@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Khám phá 100 thiết kế Streetwear KCJ, lọc theo giá, Size, màu sắc và chất liệu." />
+    <meta name="theme-color" content="#f8f7f4" />
+    <title>Cửa hàng Streetwear — KCJ</title>
+    <link rel="preconnect" href="https://images.unsplash.com" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="page-common.js" defer></script>
+    <script src="shop.js" defer></script>
+  </head>
+  <body data-page="shop">
+    <div id="site-announcement"></div>
+    <header id="site-header"></header>
+    <main class="page-main shop-main">
+      <section class="page-hero shop-hero">
+        <p class="eyebrow">KCJ · STREETWEAR COLLECTION</p>
+        <h1>Phong cách<br /><em>là của bạn.</em></h1>
+        <p>100 thiết kế tối giản, chất liệu dễ chịu và những sắc màu dành cho nhịp sống riêng.</p>
+        <a class="text-link" href="#shop-products">Khám phá bộ sưu tập <span aria-hidden="true">↓</span></a>
+      </section>
+
+      <section class="shop-section" id="shop-products" aria-labelledby="shop-title">
+        <div class="section-heading shop-heading">
+          <div>
+            <p class="eyebrow">CHỌN MÓN BẠN THÍCH</p>
+            <h2 id="shop-title">Cửa hàng KCJ</h2>
+          </div>
+          <span class="product-total" id="shop-product-total">100 sản phẩm</span>
+        </div>
+
+        <div class="shop-layout">
+          <aside class="shop-filters" aria-label="Bộ lọc sản phẩm">
+            <div class="filter-heading"><h2>Bộ lọc</h2><a href="shop.html">Xóa lọc</a></div>
+            <label class="filter-field"><span>Tìm sản phẩm</span><input id="shop-search" type="search" placeholder="Ví dụ: Cargo, Hoodie..." /></label>
+            <label class="filter-field"><span>Danh mục</span>
+              <select id="filter-category">
+                <option value="all">Tất cả danh mục</option><option value="ao">Áo</option><option value="ao-khoac">Áo khoác</option><option value="quan">Quần</option><option value="phu-kien">Phụ kiện</option>
+              </select>
+            </label>
+            <fieldset class="filter-field filter-price">
+              <legend>Khoảng giá (₫)</legend>
+              <div><label class="sr-only" for="filter-min-price">Giá thấp nhất</label><input id="filter-min-price" type="number" min="0" step="50000" placeholder="Từ" /><span>—</span><label class="sr-only" for="filter-max-price">Giá cao nhất</label><input id="filter-max-price" type="number" min="0" step="50000" placeholder="Đến" /></div>
+            </fieldset>
+            <label class="filter-field"><span>Kích cỡ</span>
+              <select id="filter-size"><option value="all">Tất cả Size</option><option>S</option><option>M</option><option>L</option><option>XL</option></select>
+            </label>
+            <label class="filter-field"><span>Màu sắc</span>
+              <select id="filter-color">
+                <option value="all">Tất cả màu</option><option>Đen</option><option>Kem</option><option>Olive</option><option>Xám</option><option>Navy</option><option>Be</option><option>Xanh denim</option><option>Đỏ đô</option><option>Trắng ngà</option><option>Nâu</option>
+              </select>
+            </label>
+            <label class="filter-field"><span>Chất liệu</span>
+              <select id="filter-material">
+                <option value="all">Tất cả chất liệu</option><option>Cotton 100%</option><option>Cotton nỉ</option><option>Nỉ dày, tay da tổng hợp</option><option>Cotton twill</option><option>Denim cotton</option><option>Nylon tái chế</option><option>Cotton twill, lưới polyester</option><option>Cotton pha acrylic</option><option>Canvas chống bám nhẹ</option><option>Polyester chống gió</option>
+              </select>
+            </label>
+            <label class="filter-field"><span>Sắp xếp</span>
+              <select id="filter-sort"><option value="best">Bán chạy nhất</option><option value="price-asc">Giá: thấp đến cao</option><option value="price-desc">Giá: cao đến thấp</option></select>
+            </label>
+          </aside>
+
+          <div class="shop-results">
+            <p class="shop-result-count" id="shop-result-count" aria-live="polite"></p>
+            <div class="product-grid shop-product-grid" id="shop-product-grid"></div>
+            <p class="shop-empty" id="shop-empty" hidden>Không tìm thấy sản phẩm phù hợp. Hãy thử thay đổi bộ lọc nhé.</p>
+            <nav class="shop-pagination" id="shop-pagination" aria-label="Phân trang sản phẩm"></nav>
+          </div>
+        </div>
+      </section>
+    </main>
+    <div id="site-footer"></div>
+  </body>
+</html>
