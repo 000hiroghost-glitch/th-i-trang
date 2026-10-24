@@ -1,66 +1,6 @@
 "use strict";
 
 (() => {
-  const imageSources = [
-    "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85",
-    "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=900&q=85",
-    "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=900&q=85",
-    "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=900&q=85",
-    "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=900&q=85",
-    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=900&q=85",
-    "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=900&q=85",
-    "https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=900&q=85",
-    "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=900&q=85",
-    "https://images.unsplash.com/photo-1548126032-079a0fb0099d?auto=format&fit=crop&w=900&q=85",
-  ];
-  const colors = [
-    { name: "Đen", slug: "den" },
-    { name: "Kem", slug: "kem" },
-    { name: "Olive", slug: "olive" },
-    { name: "Xám", slug: "xam" },
-    { name: "Navy", slug: "navy" },
-    { name: "Be", slug: "be" },
-    { name: "Xanh denim", slug: "xanh-denim" },
-    { name: "Đỏ đô", slug: "do-do" },
-    { name: "Trắng ngà", slug: "trang-nga" },
-    { name: "Nâu", slug: "nau" },
-  ];
-  const productTypes = [
-    { base: "Áo phông Boxy Fit", category: "ao", material: "Cotton 100%", price: 389000, fit: "Boxy Fit" },
-    { base: "Zip Hoodie", category: "ao-khoac", material: "Cotton nỉ", price: 790000, fit: "Relaxed Fit" },
-    { base: "Varsity Jacket", category: "ao-khoac", material: "Nỉ dày, tay da tổng hợp", price: 1190000, fit: "Oversize" },
-    { base: "Quần Cargo", category: "quan", material: "Cotton twill", price: 729000, fit: "Ống rộng" },
-    { base: "Baggy Denim", category: "quan", material: "Denim cotton", price: 849000, fit: "Baggy" },
-    { base: "Parachute Pants", category: "quan", material: "Nylon tái chế", price: 790000, fit: "Ống rộng, gấu rút" },
-    { base: "Nón Trucker", category: "phu-kien", material: "Cotton twill, lưới polyester", price: 329000, fit: "Freesize, khóa điều chỉnh" },
-    { base: "Beanie dệt gân", category: "phu-kien", material: "Cotton pha acrylic", price: 279000, fit: "Freesize" },
-    { base: "Túi đeo chéo", category: "phu-kien", material: "Canvas chống bám nhẹ", price: 459000, fit: "Dây đeo điều chỉnh" },
-    { base: "Áo khoác Coach", category: "ao-khoac", material: "Polyester chống gió", price: 890000, fit: "Regular Fit" },
-  ];
-  const categoryNames = {
-    ao: "ÁO",
-    "ao-khoac": "ÁO KHOÁC",
-    quan: "QUẦN",
-    "phu-kien": "PHỤ KIỆN",
-  };
-  const shopCatalog = productTypes.flatMap((type, typeIndex) =>
-    colors.map((color, colorIndex) => ({
-      id: `${type.base.toLocaleLowerCase("vi").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-")}-${color.slug}`,
-      name: `${type.base} · ${color.name}`,
-      category: type.category,
-      categoryLabel: `${categoryNames[type.category]} · STREETWEAR`,
-      material: type.material,
-      fit: type.fit,
-      color: color.name,
-      sizes: ["S", "M", "L", "XL"],
-      price: type.price + (colorIndex % 4) * 25000,
-      image: imageSources[typeIndex],
-      alt: `${type.base} màu ${color.name}, phong cách Streetwear KCJ`,
-      soldCount: 35 + ((typeIndex * 73 + colorIndex * 41) % 465),
-      badge: colorIndex === 0 ? "BÁN CHẠY" : colorIndex === 1 ? "MỚI" : "",
-    }))
-  );
-
   const grid = document.querySelector("#shop-product-grid");
   const filters = {
     search: document.querySelector("#shop-search"),
@@ -69,36 +9,36 @@
     maximum: document.querySelector("#filter-max-price"),
     size: document.querySelector("#filter-size"),
     color: document.querySelector("#filter-color"),
-    material: document.querySelector("#filter-material"),
     sort: document.querySelector("#filter-sort"),
   };
   const pagination = document.querySelector("#shop-pagination");
   const resultLabel = document.querySelector("#shop-result-count");
   const emptyState = document.querySelector("#shop-empty");
+  const errorState = document.querySelector("#shop-load-error");
+  const retryButton = document.querySelector("#shop-retry");
+  const productTotal = document.querySelector("#shop-product-total");
   const pageSize = 20;
-  let currentPage = 1;
-  let filteredProducts = [];
   const currency = new Intl.NumberFormat("vi-VN");
+  let currentPage = 1;
+  let products = [];
+  let filteredProducts = [];
+  let requestController;
+
   const formatPrice = value => `${currency.format(value)}₫`;
 
   const createCard = product => {
     const card = document.createElement("article");
     card.className = "product-card";
     card.dataset.id = product.id;
+
     const imageWrap = document.createElement("div");
     imageWrap.className = "product-image-wrap";
     const image = document.createElement("img");
     image.className = "product-image";
     image.src = product.image;
-    image.alt = product.alt;
+    image.alt = product.name;
     image.loading = "lazy";
     imageWrap.append(image);
-    if (product.badge) {
-      const badge = document.createElement("span");
-      badge.className = `product-badge${product.badge === "MỚI" ? " product-badge-light" : ""}`;
-      badge.textContent = product.badge;
-      imageWrap.append(badge);
-    }
 
     const info = document.createElement("div");
     info.className = "product-info";
@@ -116,59 +56,53 @@
 
     const footer = document.createElement("div");
     footer.className = "product-footer shop-product-footer";
+    const variantList = document.createElement("ul");
+    variantList.className = "shop-variant-list";
+    variantList.setAttribute("aria-label", `Size và màu của ${product.name}`);
+    product.variants.forEach(variant => {
+      const item = document.createElement("li");
+      item.textContent = [variant.size, variant.color].filter(Boolean).join(" · ");
+      variantList.append(item);
+    });
+
     const sizeLabel = document.createElement("label");
     sizeLabel.className = "shop-size-field";
     sizeLabel.textContent = "Size";
     const sizeSelect = document.createElement("select");
     sizeSelect.setAttribute("aria-label", `Chọn Size cho ${product.name}`);
-    product.sizes.forEach(size => {
+    const sizes = [...new Set(product.variants.map(variant => variant.size))];
+    sizes.forEach(size => {
       const option = document.createElement("option");
       option.value = size;
       option.textContent = size;
       sizeSelect.append(option);
     });
     sizeLabel.append(sizeSelect);
+
     const addButton = document.createElement("button");
     addButton.className = "buy-button";
     addButton.type = "button";
     addButton.textContent = "Thêm vào giỏ";
+    addButton.disabled = sizes.length === 0;
     addButton.addEventListener("click", () => {
       window.KCJSite.addToCart(product, sizeSelect.value);
     });
-    footer.append(sizeLabel, addButton);
+    footer.append(variantList, sizeLabel, addButton);
     card.append(imageWrap, info, footer);
     return card;
   };
 
-  const applyFilters = () => {
-    const query = filters.search.value.trim().toLocaleLowerCase("vi");
-    const minimum = filters.minimum.value === "" ? 0 : Number(filters.minimum.value);
-    const maximum = filters.maximum.value === "" ? Infinity : Number(filters.maximum.value);
-    filteredProducts = shopCatalog.filter(product =>
-      product.name.toLocaleLowerCase("vi").includes(query) &&
-      (filters.category.value === "all" || product.category === filters.category.value) &&
-      product.price >= minimum &&
-      product.price <= maximum &&
-      (filters.size.value === "all" || product.sizes.includes(filters.size.value)) &&
-      (filters.color.value === "all" || product.color === filters.color.value) &&
-      (filters.material.value === "all" || product.material === filters.material.value)
-    );
-
-    if (filters.sort.value === "price-asc") {
-      filteredProducts.sort((left, right) => left.price - right.price);
-    } else if (filters.sort.value === "price-desc") {
-      filteredProducts.sort((left, right) => right.price - left.price);
-    } else {
-      filteredProducts.sort((left, right) => right.soldCount - left.soldCount);
-    }
-    currentPage = 1;
-    renderProducts();
-  };
-
-  const renderPagination = () => {
-    const pageCount = Math.ceil(filteredProducts.length / pageSize);
+  const renderProducts = () => {
+    const start = (currentPage - 1) * pageSize;
+    const pageProducts = filteredProducts.slice(start, start + pageSize);
+    grid.replaceChildren(...pageProducts.map(createCard));
+    resultLabel.textContent = `Đang hiển thị ${pageProducts.length} / ${filteredProducts.length} sản phẩm`;
+    emptyState.hidden = filteredProducts.length !== 0;
     pagination.replaceChildren();
+
+    const pageCount = Math.ceil(filteredProducts.length / pageSize);
     if (pageCount <= 1) return;
+
     const addButton = (label, page, disabled = false, current = false) => {
       const button = document.createElement("button");
       button.type = "button";
@@ -183,6 +117,7 @@
       });
       pagination.append(button);
     };
+
     addButton("Trước", Math.max(1, currentPage - 1), currentPage === 1);
     for (let page = 1; page <= pageCount; page += 1) {
       addButton(String(page), page, false, currentPage === page);
@@ -190,19 +125,78 @@
     addButton("Sau", Math.min(pageCount, currentPage + 1), currentPage === pageCount);
   };
 
-  const renderProducts = () => {
-    const start = (currentPage - 1) * pageSize;
-    const pageProducts = filteredProducts.slice(start, start + pageSize);
-    grid.replaceChildren(...pageProducts.map(createCard));
-    resultLabel.textContent = `Đang hiển thị ${pageProducts.length} / ${filteredProducts.length} sản phẩm`;
-    emptyState.hidden = filteredProducts.length !== 0;
-    renderPagination();
+  const applyFilters = () => {
+    const query = filters.search.value.trim().toLocaleLowerCase("vi");
+    const minimum = filters.minimum.value === "" ? 0 : Number(filters.minimum.value);
+    const maximum = filters.maximum.value === "" ? Infinity : Number(filters.maximum.value);
+    filteredProducts = products.filter(product =>
+      product.name.toLocaleLowerCase("vi").includes(query) &&
+      (filters.category.value === "all" || product.category === filters.category.value) &&
+      product.price >= minimum &&
+      product.price <= maximum &&
+      (filters.size.value === "all" || product.variants.some(variant => variant.size === filters.size.value)) &&
+      (filters.color.value === "all" || product.variants.some(variant => variant.color === filters.color.value))
+    );
+
+    if (filters.sort.value === "price-asc") {
+      filteredProducts.sort((left, right) => left.price - right.price);
+    } else if (filters.sort.value === "price-desc") {
+      filteredProducts.sort((left, right) => right.price - left.price);
+    }
+
+    currentPage = 1;
+    renderProducts();
   };
 
-  [filters.search, filters.category, filters.minimum, filters.maximum, filters.size, filters.color, filters.material, filters.sort]
+  const loadProducts = async () => {
+    requestController?.abort();
+    requestController = new AbortController();
+    grid.setAttribute("aria-busy", "true");
+    grid.replaceChildren();
+    pagination.replaceChildren();
+    emptyState.hidden = true;
+    errorState.hidden = true;
+    resultLabel.textContent = "Đang tải sản phẩm...";
+
+    try {
+      const response = await fetch("/api/products", { signal: requestController.signal });
+      if (!response.ok) {
+        throw new Error(`Products request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (!Array.isArray(data)) {
+        throw new TypeError("Products API response must be an array.");
+      }
+
+      products = data.map(product => ({
+        ...product,
+        image: product.images?.[0] || "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85",
+        category: product.category?.slug || "",
+        categoryLabel: product.category?.name || "KCJ",
+        variants: Array.isArray(product.variants) ? product.variants : [],
+      }));
+      productTotal.textContent = `${products.length} sản phẩm`;
+      grid.setAttribute("aria-busy", "false");
+      applyFilters();
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      console.error("Không thể tải danh sách sản phẩm:", error);
+      products = [];
+      filteredProducts = [];
+      productTotal.textContent = "0 sản phẩm";
+      resultLabel.textContent = "";
+      grid.setAttribute("aria-busy", "false");
+      errorState.hidden = false;
+      pagination.replaceChildren();
+    }
+  };
+
+  [filters.search, filters.category, filters.minimum, filters.maximum, filters.size, filters.color, filters.sort]
     .forEach(control => control.addEventListener(control === filters.search ? "input" : "change", applyFilters));
+  retryButton.addEventListener("click", loadProducts);
+
   const query = new URLSearchParams(window.location.search).get("q");
   if (query) filters.search.value = query;
-  applyFilters();
-  document.querySelector("#shop-product-total").textContent = `${shopCatalog.length} sản phẩm`;
+  loadProducts();
 })();

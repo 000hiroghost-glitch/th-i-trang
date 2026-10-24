@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Quản lý thông tin cá nhân và xem lịch sử đơn hàng KCJ." />
+    <meta name="theme-color" content="#f8f7f4" />
+    <title>Tài khoản của tôi — KCJ</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="page-common.js" defer></script>
+  </head>
+  <body data-page="dashboard">
+    <div id="site-announcement"></div>
+    <header id="site-header"></header>
+    <main class="page-main dashboard-main" id="dashboard-content">
+      <section class="page-hero dashboard-hero">
+        <p class="eyebrow">KCJ · KHÔNG GIAN CỦA BẠN</p>
+        <h1>Tài khoản<br /><em>của tôi.</em></h1>
+        <p>Theo dõi thông tin cá nhân và những món đồ bạn đã chọn.</p>
+      </section>
+      <section class="dashboard-gate" id="dashboard-gate">
+        <p class="eyebrow">CHÀO MỪNG BẠN</p>
+        <h2>Đăng nhập để xem tài khoản</h2>
+        <p>Hãy đăng nhập hoặc tạo tài khoản demo để quản lý hồ sơ và xem lại lịch sử đơn hàng đã lưu trên thiết bị.</p>
+        <button class="button button-dark" type="button" data-open-auth>Đăng nhập / Đăng ký</button>
+        <p class="checkout-demo-note">Chức năng tài khoản chỉ hoạt động trên thiết bị này, chưa kết nối backend.</p>
+      </section>
+      <section class="dashboard-profile" id="dashboard-profile-section" hidden>
+        <div class="dashboard-section-heading"><div><p class="eyebrow">HỒ SƠ CỦA BẠN</p><h2>Thông tin cá nhân</h2></div><button class="text-button" id="dashboard-logout" type="button">Đăng xuất</button></div>
+        <form class="dashboard-profile-form" id="dashboard-profile">
+          <label class="form-field"><span>Họ và tên</span><input name="name" type="text" minlength="2" maxlength="100" autocomplete="name" required /></label>
+          <label class="form-field"><span>Email</span><input name="email" type="email" readonly aria-describedby="email-help" /><small id="email-help">Email đăng nhập demo không thể chỉnh sửa tại đây.</small></label>
+          <label class="form-field"><span>Số điện thoại (không bắt buộc)</span><input name="phone" type="tel" autocomplete="tel" inputmode="tel" pattern="(?:0|\+?84)[0-9]{9,10}" title="Để trống hoặc nhập số bắt đầu bằng 0 hoặc +84." /></label>
+          <button class="checkout-confirm-button" type="submit">Lưu thông tin</button>
+        </form>
+        <div class="dashboard-section-heading order-history-heading"><div><p class="eyebrow">KCJ · ĐƠN HÀNG</p><h2>Lịch sử đơn hàng</h2></div><span class="product-total" id="dashboard-order-count">0 đơn hàng</span></div>
+        <div class="order-history-list" id="order-history-list"></div>
+      </section>
+    </main>
+    <div id="site-footer"></div>
+  </body>
+</html>

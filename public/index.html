@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Khám phá những thiết kế thời trang hiện đại, dễ ứng dụng mỗi ngày tại KCJ."
+    />
+    <meta name="theme-color" content="#f8f7f4" />
+    <title>KCJ — Mặc điều bạn yêu</title>
+    <link rel="preconnect" href="https://images.unsplash.com" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="announcement-bar">
+      Miễn phí giao hàng cho đơn từ 699.000₫
+      <span aria-hidden="true">✦</span>
+      Đổi trả dễ dàng trong 7 ngày
+    </div>
+
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="KCJ — Trang chủ">KCJ<span>.</span></a>
+
+      <form class="search-form" id="home-search-form" role="search">
+        <label class="sr-only" for="product-search">Tìm kiếm sản phẩm</label>
+        <svg aria-hidden="true" viewBox="0 0 24 24">
+          <circle cx="10.8" cy="10.8" r="6.8"></circle>
+          <path d="m16 16 4.2 4.2"></path>
+        </svg>
+        <input
+          id="product-search"
+          name="q"
+          type="search"
+          placeholder="Tìm chiếc áo bạn yêu..."
+          autocomplete="off"
+        />
+      </form>
+
+      <div class="header-actions">
+        <button
+          class="account-trigger"
+          id="account-trigger"
+          type="button"
+          aria-label="Mở đăng nhập hoặc đăng ký"
+          aria-controls="auth-modal"
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="3.5"></circle>
+            <path d="M4.8 20a7.2 7.2 0 0 1 14.4 0"></path>
+          </svg>
+          <span class="account-label">Tài khoản</span>
+        </button>
+        <button
+          class="cart-trigger"
+          id="cart-trigger"
+          type="button"
+          aria-label="Mở giỏ hàng"
+          aria-controls="cart-panel"
+          aria-expanded="false"
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L21 8H6"></path>
+            <circle cx="10" cy="20" r="1"></circle>
+            <circle cx="18" cy="20" r="1"></circle>
+          </svg>
+          <span class="cart-label">Giỏ hàng</span>
+          <span class="cart-count" id="cart-count" aria-live="polite">0</span>
+        </button>
+      </div>
+    </header>
+    <nav class="primary-nav" aria-label="Điều hướng chính">
+      <a href="index.html" aria-current="page">Trang chủ</a>
+      <a href="shop.html">Cửa hàng</a>
+      <a href="about.html">Giới thiệu</a>
+      <a href="contact.html">Liên hệ</a>
+      <a href="policy.html">Chính sách</a>
+      <a href="/admin/orders" id="admin-nav-link" hidden>Quản trị</a>
+    </nav>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">BỘ SƯU TẬP MỚI</p>
+          <h1 id="hero-title">Mặc điều<br />bạn <em>yêu.</em></h1>
+          <p class="hero-description">
+            Những thiết kế tối giản, chất liệu dễ chịu và cảm hứng để bạn là
+            chính mình mỗi ngày.
+          </p>
+          <a class="button button-dark" href="shop.html">Khám phá bộ sưu tập</a>
+          <div class="hero-note">
+            <span class="hero-note-line"></span>
+            <span>Thiết kế cho nhịp sống của bạn</span>
+          </div>
+        </div>
+        <div class="hero-image" role="img" aria-label="Phong cách thời trang hiện đại">
+          <span class="hero-image-tag">NEW<br />SEASON</span>
+        </div>
+        <div class="hero-index" aria-hidden="true">01 / 03</div>
+      </section>
+
+      <section class="collection-section" id="products" aria-labelledby="products-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">CHỌN MÓN BẠN THÍCH</p>
+            <h2 id="products-title">Được yêu thích</h2>
+          </div>
+          <span class="product-total" id="product-total">20 sản phẩm</span>
+        </div>
+
+        <nav class="category-filters" id="category-filters" aria-label="Lọc sản phẩm theo danh mục">
+          <button class="category-filter is-active" type="button" data-category="all" aria-pressed="true">Tất cả</button>
+          <button class="category-filter" type="button" data-category="ao" aria-pressed="false">Áo</button>
+          <button class="category-filter" type="button" data-category="quan" aria-pressed="false">Quần</button>
+          <button class="category-filter" type="button" data-category="vay" aria-pressed="false">Váy</button>
+          <button class="category-filter" type="button" data-category="ao-khoac" aria-pressed="false">Áo khoác</button>
+          <button class="category-filter" type="button" data-category="phu-kien" aria-pressed="false">Phụ kiện</button>
+          <button class="category-filter" type="button" data-category="giay" aria-pressed="false">Giày</button>
+        </nav>
+
+        <div class="product-grid" id="product-grid">
+          <article
+            class="product-card"
+            data-id="ao-thun-cotton-mem"
+            data-name="Áo thun cotton mềm"
+            data-price="329000"
+            data-category="ao"
+          >
+            <div class="product-image-wrap">
+              <img
+                class="product-image"
+                src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&amp;fit=crop&amp;w=900&amp;q=85"
+                alt="Áo thun cotton màu trắng kiểu dáng tối giản"
+                loading="lazy"
+              />
+              <span class="product-badge">BÁN CHẠY</span>
+              <button class="quick-add" type="button" aria-label="Xem nhanh chi tiết Áo thun cotton mềm">
+                <span aria-hidden="true">+</span>
+              </button>
+            </div>
+            <div class="product-info">
+              <div>
+                <p class="product-category">ÁO · COTTON 100%</p>
+                <h3>Áo thun cotton mềm</h3>
+              </div>
+              <p class="product-price">329.000₫</p>
+            </div>
+            <div class="product-footer">
+              <div class="color-options" aria-label="Màu sắc: Trắng, Đen">
+                <span class="color-dot color-white"></span>
+                <span class="color-dot color-black"></span>
+                <span class="color-caption">+2 màu</span>
+              </div>
+              <button class="buy-button" type="button">Mua ngay</button>
+            </div>
+          </article>
+
+          <article
+            class="product-card"
+            data-id="ao-so-mi-linen"
+            data-name="Áo sơ mi linen"
+            data-price="589000"
+            data-category="ao"
+          >
+            <div class="product-image-wrap">
+              <img
+                class="product-image"
+                src="https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&amp;fit=crop&amp;w=900&amp;q=85"
+                alt="Áo sơ mi linen phong cách thanh lịch"
+                loading="lazy"
+              />
+              <span class="product-badge product-badge-light">MỚI</span>
+              <button class="quick-add" type="button" aria-label="Xem nhanh chi tiết Áo sơ mi linen">
+                <span aria-hidden="true">+</span>
+              </button>
+            </div>
+            <div class="product-info">
+              <div>
+                <p class="product-category">ÁO · LINEN PHA</p>
+                <h3>Áo sơ mi linen</h3>
+              </div>
+              <p class="product-price">589.000₫</p>
+            </div>
+            <div class="product-footer">
+              <div class="color-options" aria-label="Màu sắc: Kem, Xanh">
+                <span class="color-dot color-cream"></span>
+                <span class="color-dot color-blue"></span>
+                <span class="color-caption">+1 màu</span>
+              </div>
+              <button class="buy-button" type="button">Mua ngay</button>
+            </div>
+          </article>
+
+          <article
+            class="product-card"
+            data-id="quan-ong-rong-thanh-lich"
+            data-name="Quần ống rộng thanh lịch"
+            data-price="649000"
+            data-category="quan"
+          >
+            <div class="product-image-wrap">
+              <img
+                class="product-image"
+                src="https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&amp;fit=crop&amp;w=900&amp;q=85"
+                alt="Quần dài dáng rộng màu trung tính"
+                loading="lazy"
+              />
+              <button class="quick-add" type="button" aria-label="Xem nhanh chi tiết Quần ống rộng thanh lịch">
+                <span aria-hidden="true">+</span>
+              </button>
+            </div>
+            <div class="product-info">
+              <div>
+                <p class="product-category">QUẦN · DÁNG RỘNG</p>
+                <h3>Quần ống rộng thanh lịch</h3>
+              </div>
+              <p class="product-price">649.000₫</p>
+            </div>
+            <div class="product-footer">
+              <div class="color-options" aria-label="Màu sắc: Đen, Be">
+                <span class="color-dot color-black"></span>
+                <span class="color-dot color-beige"></span>
+                <span class="color-caption">+1 màu</span>
+              </div>
+              <button class="buy-button" type="button">Mua ngay</button>
+            </div>
+          </article>
+
+          <article
+            class="product-card"
+            data-id="ao-khoac-det-nhe"
+            data-name="Áo khoác dệt nhẹ"
+            data-price="799000"
+            data-category="ao-khoac"
+          >
+            <div class="product-image-wrap">
+              <img
+                class="product-image"
+                src="https://images.unsplash.com/photo-1548126032-079a0fb0099d?auto=format&amp;fit=crop&amp;w=900&amp;q=85"
+                alt="Áo khoác thời trang phong cách tối giản"
+                loading="lazy"
+              />
+              <span class="product-badge product-badge-sale">-15%</span>
+              <button class="quick-add" type="button" aria-label="Xem nhanh chi tiết Áo khoác dệt nhẹ">
+                <span aria-hidden="true">+</span>
+              </button>
+            </div>
+            <div class="product-info">
+              <div>
+                <p class="product-category">ÁO KHOÁC · DỆT NHẸ</p>
+                <h3>Áo khoác dệt nhẹ</h3>
+              </div>
+              <p class="product-price">799.000₫</p>
+            </div>
+            <div class="product-footer">
+              <div class="color-options" aria-label="Màu sắc: Nâu, Trắng">
+                <span class="color-dot color-brown"></span>
+                <span class="color-dot color-white"></span>
+                <span class="color-caption">+2 màu</span>
+              </div>
+              <button class="buy-button" type="button">Mua ngay</button>
+            </div>
+          </article>
+        </div>
+        <p class="empty-search" id="empty-search" hidden>
+          Chưa tìm thấy sản phẩm phù hợp. Bạn thử tìm với từ khóa khác nhé.
+        </p>
+      </section>
+
+      <section class="newsletter" aria-labelledby="newsletter-title">
+        <p class="eyebrow">Ở LẠI CÙNG KCJ</p>
+        <h2 id="newsletter-title">Một chút cảm hứng<br />cho ngày mới.</h2>
+        <p>Khám phá những thiết kế mới và ưu đãi dành riêng cho bạn.</p>
+        <a href="mailto:hello@kcj.vn" class="newsletter-link">
+          Kết nối với chúng tôi <span aria-hidden="true">↗</span>
+        </a>
+      </section>
+    </main>
+
+    <footer class="site-footer" id="contact">
+      <div class="footer-main">
+        <div class="footer-brand">
+          <a class="brand brand-footer" href="#" aria-label="KCJ — Trang chủ">KCJ<span>.</span></a>
+          <p>Mặc điều bạn yêu.<br />Tự tin theo cách của riêng bạn.</p>
+        </div>
+        <div class="footer-column">
+          <h2>Hỗ trợ</h2>
+          <a href="mailto:000hiroghost@gmail.com">000hiroghost@gmail.com</a>
+          <a href="tel:+84929332399">0929 332 399</a>
+          <span>Thứ 2 – Thứ 7, 9:00 – 18:00</span>
+        </div>
+        <div class="footer-column">
+          <h2>Ghé thăm</h2>
+          <span>135 Nguyễn Huệ, phường Bến Nghé, Quận 1</span>
+          <span>Thành phố Hồ Chí Minh, Việt Nam</span>
+        </div>
+        <div class="footer-column">
+          <h2>Khám phá</h2>
+          <a href="index.html">Trang chủ</a>
+          <a href="shop.html">Cửa hàng</a>
+          <a href="about.html">Giới thiệu</a>
+          <a href="contact.html">Liên hệ</a>
+          <a href="policy.html">Chính sách</a>
+        </div>
+        <div class="footer-column">
+          <h2>Theo dõi KCJ</h2>
+          <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Instagram ↗</a>
+          <a href="https://www.facebook.com/profile.php?id=61578550865354" target="_blank" rel="noreferrer">Facebook ↗</a>
+          <a href="dashboard.html">Tài khoản của tôi</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 KCJ. Mọi quyền được bảo lưu.</span>
+        <span>Thiết kế bằng sự trân trọng dành cho bạn.</span>
+      </div>
+    </footer>
+
+    <div class="cart-backdrop" id="cart-backdrop" hidden></div>
+    <aside
+      class="cart-panel"
+      id="cart-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cart-title"
+      aria-hidden="true"
+      inert
+    >
+      <div class="cart-panel-header">
+        <div>
+          <p class="eyebrow">KCJ · YOUR PICKS</p>
+          <h2 id="cart-title">Giỏ hàng <span id="cart-panel-count">(0)</span></h2>
+        </div>
+        <button class="cart-close" id="cart-close" type="button" aria-label="Đóng giỏ hàng">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="cart-items" id="cart-items">
+        <p class="cart-empty">Giỏ hàng đang chờ món đồ bạn yêu.</p>
+      </div>
+      <div class="cart-summary">
+        <div class="cart-subtotal">
+          <span>Tạm tính</span>
+          <strong id="cart-subtotal">0₫</strong>
+        </div>
+        <p>Phí giao hàng sẽ được tính ở bước tiếp theo.</p>
+        <button class="checkout-button" id="checkout-button" type="button" disabled>
+          Tiến hành đặt hàng
+        </button>
+      </div>
+    </aside>
+
+    <div class="detail-backdrop" id="detail-backdrop" hidden></div>
+    <section
+      class="detail-panel"
+      id="detail-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="detail-title"
+      aria-hidden="true"
+      inert
+    >
+      <button class="detail-close" id="detail-close" type="button" aria-label="Đóng chi tiết sản phẩm">
+        <span aria-hidden="true">×</span>
+      </button>
+      <div class="detail-layout">
+        <div class="detail-image-wrap">
+          <img class="detail-image" id="detail-image" src="" alt="" />
+          <span class="detail-image-caption">KCJ · YOUR EVERYDAY</span>
+        </div>
+        <div class="detail-content">
+          <p class="eyebrow" id="detail-category"></p>
+          <h2 id="detail-title"></h2>
+          <p class="detail-price" id="detail-price"></p>
+          <p class="detail-description" id="detail-description"></p>
+
+          <div class="detail-option">
+            <div class="detail-option-heading">
+              <span>Chọn Size</span>
+              <a href="#size-guide">Hướng dẫn chọn Size</a>
+            </div>
+            <div class="size-options" id="size-options" role="group" aria-label="Chọn Size">
+              <button class="size-option" type="button" data-size="S" aria-pressed="false">S</button>
+              <button class="size-option" type="button" data-size="M" aria-pressed="false">M</button>
+              <button class="size-option" type="button" data-size="L" aria-pressed="false">L</button>
+              <button class="size-option" type="button" data-size="XL" aria-pressed="false">XL</button>
+            </div>
+          </div>
+
+          <div class="detail-option">
+            <span class="detail-label">Số lượng</span>
+            <div class="detail-quantity" aria-label="Chọn số lượng">
+              <button id="detail-quantity-decrease" type="button" aria-label="Giảm số lượng">−</button>
+              <span id="detail-quantity">1</span>
+              <button id="detail-quantity-increase" type="button" aria-label="Tăng số lượng">+</button>
+            </div>
+          </div>
+
+          <dl class="material-table" id="size-guide">
+            <div><dt>Chất liệu</dt><dd id="detail-material"></dd></div>
+            <div><dt>Kiểu dáng</dt><dd id="detail-fit"></dd></div>
+            <div><dt>Hướng dẫn bảo quản</dt><dd id="detail-care"></dd></div>
+          </dl>
+
+          <div class="detail-summary">
+            <div><span>Sản phẩm</span><strong id="summary-product">—</strong></div>
+            <div><span>Size</span><strong id="summary-size">Chưa chọn</strong></div>
+            <div><span>Số lượng</span><strong id="summary-quantity">1</strong></div>
+            <div class="detail-summary-total"><span>Tạm tính</span><strong id="summary-total">0₫</strong></div>
+          </div>
+
+          <p class="detail-validation" id="detail-validation" role="status" aria-live="polite"></p>
+          <div class="detail-actions">
+            <button class="detail-add-button" id="detail-add-button" type="button" disabled>Thêm vào giỏ</button>
+            <button class="detail-checkout-button" id="detail-checkout-button" type="button" disabled>Thanh toán</button>
+          </div>
+          <p class="detail-demo-note">Bản xem trước giao diện. Thanh toán trực tuyến chưa được kết nối.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="checkout-backdrop" id="checkout-backdrop" hidden></div>
+    <section
+      class="checkout-panel"
+      id="checkout-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="checkout-title"
+      aria-hidden="true"
+      inert
+    >
+      <div class="checkout-panel-header">
+        <div>
+          <p class="eyebrow">KCJ · XÁC NHẬN ĐẶT HÀNG</p>
+          <h2 id="checkout-title">Thông tin giao hàng</h2>
+        </div>
+        <button class="checkout-close" id="checkout-close" type="button" aria-label="Đóng thanh toán">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <form class="checkout-form" id="checkout-form" novalidate>
+        <label class="form-field">
+          <span>Họ và tên</span>
+          <input
+            id="customer-name"
+            name="customerName"
+            type="text"
+            autocomplete="name"
+            minlength="2"
+            maxlength="100"
+            placeholder="Nguyễn Minh Anh"
+            required
+          />
+        </label>
+        <label class="form-field">
+          <span>Số điện thoại</span>
+          <input
+            id="customer-phone"
+            name="customerPhone"
+            type="tel"
+            autocomplete="tel"
+            inputmode="tel"
+            pattern="(?:0|\+?84)[0-9]{9,10}"
+            maxlength="13"
+            placeholder="0912345678"
+            title="Nhập số điện thoại bắt đầu bằng 0 hoặc +84."
+            required
+          />
+        </label>
+        <label class="form-field">
+          <span>Địa chỉ giao hàng</span>
+          <textarea
+            id="customer-address"
+            name="customerAddress"
+            autocomplete="street-address"
+            minlength="8"
+            maxlength="300"
+            rows="3"
+            placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"
+            required
+          ></textarea>
+        </label>
+
+        <fieldset class="payment-methods">
+          <legend>Phương thức thanh toán</legend>
+          <label class="payment-option">
+            <input type="radio" name="paymentMethod" value="cod" required />
+            <span class="payment-option-copy">
+              <strong>Thanh toán khi nhận hàng (COD)</strong>
+              <small>Thanh toán trực tiếp khi nhận đơn.</small>
+            </span>
+          </label>
+          <label class="payment-option">
+            <input type="radio" name="paymentMethod" value="qr" required />
+            <span class="payment-option-copy">
+              <strong>Chuyển khoản QR</strong>
+              <small>Thông tin minh họa cho bản demo.</small>
+            </span>
+          </label>
+        </fieldset>
+
+        <div class="qr-demo-panel" id="qr-demo-panel" hidden>
+          <div class="qr-demo-image" aria-label="Mã QR minh họa, không thể dùng để thanh toán">
+            <span>KCJ</span>
+          </div>
+          <div>
+            <strong>Thông tin chuyển khoản demo</strong>
+            <p>Ngân hàng: KCJ Demo Bank</p>
+            <p>Nội dung: <span id="qr-transfer-note">KCJ</span></p>
+            <small>Mã QR minh họa, không dùng để chuyển tiền thật.</small>
+          </div>
+        </div>
+
+        <div class="checkout-order-preview">
+          <h3>Đơn hàng của bạn</h3>
+          <div id="checkout-order-items"></div>
+          <div class="checkout-order-total">
+            <span>Tổng thanh toán</span>
+            <strong id="checkout-order-total">0₫</strong>
+          </div>
+        </div>
+
+        <p class="checkout-form-error" id="checkout-form-error" role="alert" aria-live="assertive"></p>
+        <button class="checkout-confirm-button" id="checkout-confirm-button" type="submit">
+          Xác nhận đặt hàng
+        </button>
+        <p class="checkout-demo-note">
+          Đây là đơn hàng demo. Website chưa kết nối giao hàng hoặc xử lý thanh toán thật.
+        </p>
+      </form>
+    </section>
+
+    <div class="order-backdrop" id="order-backdrop" hidden></div>
+    <section
+      class="order-panel"
+      id="order-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="order-title"
+      aria-hidden="true"
+      inert
+    >
+      <button class="order-close" id="order-close" type="button" aria-label="Đóng tóm tắt đơn hàng">
+        <span aria-hidden="true">×</span>
+      </button>
+      <div class="order-success-mark" aria-hidden="true">✓</div>
+      <p class="eyebrow">KCJ · CẢM ƠN BẠN</p>
+      <h2 id="order-title">Đặt hàng thành công</h2>
+      <p class="order-status-note" id="order-status-note"></p>
+      <div class="order-metadata">
+        <div><span>Mã đơn hàng</span><strong id="order-id"></strong></div>
+        <div><span>Thời gian</span><strong id="order-date"></strong></div>
+        <div><span>Người nhận</span><strong id="order-customer"></strong></div>
+        <div><span>Số điện thoại</span><strong id="order-phone"></strong></div>
+        <div><span>Địa chỉ giao hàng</span><strong id="order-address"></strong></div>
+        <div><span>Thanh toán</span><strong id="order-payment"></strong></div>
+      </div>
+      <div class="order-items" id="order-items"></div>
+      <div class="order-total">
+        <span>Tổng cộng</span>
+        <strong id="order-total"></strong>
+      </div>
+      <button class="order-continue-button" id="order-continue-button" type="button">
+        Tiếp tục mua sắm
+      </button>
+      <p class="checkout-demo-note">
+        Đơn hàng này chỉ được lưu trên thiết bị để minh họa; chưa gửi tới hệ thống bán hàng.
+      </p>
+    </section>
+
+    <div class="auth-backdrop" id="auth-modal" hidden>
+      <section
+        class="auth-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auth-title"
+        aria-describedby="auth-description"
+      >
+        <button class="auth-close" id="auth-close" type="button" aria-label="Đóng cửa sổ tài khoản">
+          <span aria-hidden="true">×</span>
+        </button>
+        <div class="auth-brand-mark" aria-hidden="true">KCJ<span>.</span></div>
+        <p class="eyebrow">CHÀO MỪNG BẠN ĐẾN VỚI KCJ</p>
+        <h2 class="auth-title" id="auth-title">Tài khoản của bạn</h2>
+        <p class="auth-description" id="auth-description">
+          Đăng nhập hoặc tạo tài khoản để tiếp tục hành trình cùng KCJ.
+        </p>
+
+        <div class="auth-tabs" role="tablist" aria-label="Đăng nhập hoặc đăng ký">
+          <button
+            class="auth-tab is-active"
+            id="login-tab"
+            type="button"
+            role="tab"
+            aria-selected="true"
+            aria-controls="login-view"
+            data-auth-view="login"
+          >
+            Đăng nhập
+          </button>
+          <button
+            class="auth-tab"
+            id="register-tab"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="register-view"
+            data-auth-view="register"
+          >
+            Đăng ký
+          </button>
+        </div>
+
+        <form class="auth-form" id="login-view" role="tabpanel" aria-labelledby="login-tab" novalidate>
+          <label class="auth-field">
+            <span>Email</span>
+            <input
+              id="login-email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              maxlength="254"
+              placeholder="ten@email.com"
+              required
+            />
+          </label>
+          <label class="auth-field">
+            <span>Mật khẩu</span>
+            <input
+              id="login-password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              minlength="8"
+              maxlength="128"
+              placeholder="Nhập mật khẩu"
+              required
+            />
+          </label>
+          <p class="auth-message" id="login-message" role="status" aria-live="polite"></p>
+          <button class="auth-submit" type="submit">Đăng nhập</button>
+          <p class="auth-switch-copy">
+            Chưa có tài khoản?
+            <button class="auth-switch-button" type="button" data-auth-view="register">
+              Tạo tài khoản
+            </button>
+          </p>
+        </form>
+
+        <form
+          class="auth-form"
+          id="register-view"
+          role="tabpanel"
+          aria-labelledby="register-tab"
+          novalidate
+          hidden
+        >
+          <label class="auth-field">
+            <span>Họ và tên</span>
+            <input
+              id="register-name"
+              name="name"
+              type="text"
+              autocomplete="name"
+              minlength="2"
+              maxlength="100"
+              placeholder="Nguyễn Minh Anh"
+              required
+            />
+          </label>
+          <label class="auth-field">
+            <span>Email</span>
+            <input
+              id="register-email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              maxlength="254"
+              placeholder="ten@email.com"
+              required
+            />
+          </label>
+          <label class="auth-field">
+            <span>Mật khẩu</span>
+            <input
+              id="register-password"
+              name="password"
+              type="password"
+              autocomplete="new-password"
+              minlength="8"
+              maxlength="128"
+              placeholder="Tối thiểu 8 ký tự"
+              required
+            />
+          </label>
+          <label class="auth-field">
+            <span>Nhập lại mật khẩu</span>
+            <input
+              id="register-password-confirm"
+              name="passwordConfirm"
+              type="password"
+              autocomplete="new-password"
+              minlength="8"
+              maxlength="128"
+              placeholder="Nhập lại mật khẩu"
+              required
+            />
+          </label>
+          <p class="auth-message" id="register-message" role="status" aria-live="polite"></p>
+          <button class="auth-submit" type="submit">Tạo tài khoản</button>
+          <p class="auth-switch-copy">
+            Đã có tài khoản?
+            <button class="auth-switch-button" type="button" data-auth-view="login">
+              Đăng nhập
+            </button>
+          </p>
+        </form>
+
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

@@ -1348,9 +1348,40 @@ button {
   font: inherit;
 }
 
+.shop-variant-list {
+  display: flex;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shop-variant-list li {
+  padding: 4px 6px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 9px;
+}
+
 .shop-product-footer .buy-button {
   padding-left: 0;
   font-size: 9px;
+}
+
+.shop-load-error {
+  padding: 48px 14px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.shop-load-error button {
+  margin-left: 8px;
+  border: 0;
+  background: none;
+  cursor: pointer;
 }
 
 .shop-empty {

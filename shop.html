@@ -52,20 +52,19 @@
                 <option value="all">Tất cả màu</option><option>Đen</option><option>Kem</option><option>Olive</option><option>Xám</option><option>Navy</option><option>Be</option><option>Xanh denim</option><option>Đỏ đô</option><option>Trắng ngà</option><option>Nâu</option>
               </select>
             </label>
-            <label class="filter-field"><span>Chất liệu</span>
-              <select id="filter-material">
-                <option value="all">Tất cả chất liệu</option><option>Cotton 100%</option><option>Cotton nỉ</option><option>Nỉ dày, tay da tổng hợp</option><option>Cotton twill</option><option>Denim cotton</option><option>Nylon tái chế</option><option>Cotton twill, lưới polyester</option><option>Cotton pha acrylic</option><option>Canvas chống bám nhẹ</option><option>Polyester chống gió</option>
-              </select>
-            </label>
             <label class="filter-field"><span>Sắp xếp</span>
               <select id="filter-sort"><option value="best">Bán chạy nhất</option><option value="price-asc">Giá: thấp đến cao</option><option value="price-desc">Giá: cao đến thấp</option></select>
             </label>
           </aside>
 
           <div class="shop-results">
-            <p class="shop-result-count" id="shop-result-count" aria-live="polite"></p>
-            <div class="product-grid shop-product-grid" id="shop-product-grid"></div>
+            <p class="shop-result-count" id="shop-result-count" role="status" aria-live="polite">Đang tải sản phẩm...</p>
+            <div class="product-grid shop-product-grid" id="shop-product-grid" aria-busy="true"></div>
             <p class="shop-empty" id="shop-empty" hidden>Không tìm thấy sản phẩm phù hợp. Hãy thử thay đổi bộ lọc nhé.</p>
+            <p class="shop-load-error" id="shop-load-error" role="alert" hidden>
+              Không thể tải danh sách sản phẩm. Vui lòng kiểm tra kết nối và thử lại.
+              <button class="text-link" id="shop-retry" type="button">Thử lại</button>
+            </p>
             <nav class="shop-pagination" id="shop-pagination" aria-label="Phân trang sản phẩm"></nav>
           </div>
         </div>
