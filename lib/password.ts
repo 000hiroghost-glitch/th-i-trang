@@ -1,4 +1,5 @@
-import { randomBytes, scrypt as scryptCallback, scryptSync, timingSafeEqual } from "node:crypto";
+import { scrypt as scryptCallback, scryptSync, timingSafeEqual } from "node:crypto";
+import bcrypt from "bcryptjs";
 
 export const DUMMY_PASSWORD_HASH =
   `scrypt$${Buffer.alloc(16).toString("hex")}$${scryptSync("KCJ invalid login", Buffer.alloc(16), 64).toString("hex")}`;
@@ -15,13 +16,14 @@ const scrypt = (
 });
 
 export async function hashPassword(password: string) {
-  const salt = randomBytes(16);
-  const derivedKey = await scrypt(password, salt, 64);
-  return `scrypt$${salt.toString("hex")}$${derivedKey.toString("hex")}`;
+  return bcrypt.hash(password, 12);
 }
 
 export async function verifyPassword(password: string, storedHash: string) {
   const [algorithm, saltHex, keyHex] = storedHash.split("$");
+  if (/^\$2[aby]\$/.test(storedHash)) {
+    return bcrypt.compare(password, storedHash);
+  }
   if (
     algorithm !== "scrypt" ||
     !/^[a-f0-9]{32}$/i.test(saltHex ?? "") ||

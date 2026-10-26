@@ -3,7 +3,10 @@ import OrderManager from "./OrderManager";
 
 export default async function AdminOrdersPage() {
   const orders = await prisma.order.findMany({
-    include: { user: { select: { fullName: true, email: true } } },
+    include: {
+      user: { select: { fullName: true, email: true } },
+      items: { include: { variant: { include: { product: { select: { name: true } } } } } },
+    },
     orderBy: { createdAt: "desc" },
   });
 

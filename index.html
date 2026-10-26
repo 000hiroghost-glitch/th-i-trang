@@ -10,6 +10,7 @@
     <meta name="theme-color" content="#f8f7f4" />
     <title>KCJ — Mặc điều bạn yêu</title>
     <link rel="preconnect" href="https://images.unsplash.com" />
+    <script>try{document.documentElement.classList.toggle("dark",localStorage.getItem("kcj-theme")==="dark")}catch(error){console.error("Không thể tải giao diện đã lưu:",error)}</script>
     <link rel="stylesheet" href="style.css" />
     <script src="script.js" defer></script>
   </head>
@@ -52,6 +53,7 @@
           </svg>
           <span class="account-label">Tài khoản</span>
         </button>
+        <a class="header-orders-link" href="/account#orders">Đơn hàng của tôi</a>
         <button
           class="cart-trigger"
           id="cart-trigger"
@@ -73,9 +75,10 @@
     <nav class="primary-nav" aria-label="Điều hướng chính">
       <a href="index.html" aria-current="page">Trang chủ</a>
       <a href="shop.html">Cửa hàng</a>
-      <a href="about.html">Giới thiệu</a>
+      <a href="about.html">Giới thiệu & Chính sách</a>
       <a href="contact.html">Liên hệ</a>
-      <a href="policy.html">Chính sách</a>
+      <a href="/account#orders">Đơn hàng của tôi</a>
+      <a href="/account?tab=admin" id="admin-nav-link" hidden>Quản trị</a>
     </nav>
 
     <main>
@@ -298,15 +301,15 @@
           <h2>Khám phá</h2>
           <a href="index.html">Trang chủ</a>
           <a href="shop.html">Cửa hàng</a>
-          <a href="about.html">Giới thiệu</a>
+          <a href="about.html">Giới thiệu & Chính sách</a>
           <a href="contact.html">Liên hệ</a>
-          <a href="policy.html">Chính sách</a>
         </div>
         <div class="footer-column">
           <h2>Theo dõi KCJ</h2>
           <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Instagram ↗</a>
           <a href="https://www.facebook.com/profile.php?id=61578550865354" target="_blank" rel="noreferrer">Facebook ↗</a>
-          <a href="dashboard.html">Tài khoản của tôi</a>
+          <a href="/account">Tài khoản của tôi</a>
+          <a href="/account#orders">Đơn hàng của tôi</a>
         </div>
       </div>
       <div class="footer-bottom">
@@ -438,47 +441,19 @@
         </button>
       </div>
       <form class="checkout-form" id="checkout-form" novalidate>
-        <label class="form-field">
-          <span>Họ và tên</span>
-          <input
-            id="customer-name"
-            name="customerName"
-            type="text"
-            autocomplete="name"
-            minlength="2"
-            maxlength="100"
-            placeholder="Nguyễn Minh Anh"
-            required
-          />
-        </label>
-        <label class="form-field">
-          <span>Số điện thoại</span>
-          <input
-            id="customer-phone"
-            name="customerPhone"
-            type="tel"
-            autocomplete="tel"
-            inputmode="tel"
-            pattern="(?:0|\+?84)[0-9]{9,10}"
-            maxlength="13"
-            placeholder="0912345678"
-            title="Nhập số điện thoại bắt đầu bằng 0 hoặc +84."
-            required
-          />
-        </label>
-        <label class="form-field">
-          <span>Địa chỉ giao hàng</span>
-          <textarea
-            id="customer-address"
-            name="customerAddress"
-            autocomplete="street-address"
-            minlength="8"
-            maxlength="300"
-            rows="3"
-            placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"
-            required
-          ></textarea>
-        </label>
+        <section class="checkout-address-section" aria-labelledby="checkout-address-title">
+          <h3 id="checkout-address-title">Địa chỉ giao hàng</h3>
+          <div id="saved-address-card" class="saved-address-card" hidden>
+            <label class="form-field" for="saved-address-select"><span>Chọn địa chỉ đã lưu</span>
+              <select id="saved-address-select"></select>
+            </label>
+            <p id="saved-address-preview"></p>
+          </div>
+          <p id="no-saved-address-note" class="checkout-address-note" hidden>
+            Bạn cần đăng nhập và lưu ít nhất một địa chỉ giao hàng trước khi đặt hàng.
+            <a href="/account#addresses">Quản lý địa chỉ cá nhân</a>
+          </p>
+        </section>
 
         <fieldset class="payment-methods">
           <legend>Phương thức thanh toán</legend>
@@ -496,6 +471,13 @@
               <small>Thông tin minh họa cho bản demo.</small>
             </span>
           </label>
+          <label class="payment-option">
+            <input type="radio" name="paymentMethod" value="installment" required />
+            <span class="payment-option-copy">
+              <strong>Đăng ký trả góp</strong>
+              <small>Yêu cầu trả góp được KCJ/đối tác xác nhận riêng.</small>
+            </span>
+          </label>
         </fieldset>
 
         <div class="qr-demo-panel" id="qr-demo-panel" hidden>
@@ -510,9 +492,37 @@
           </div>
         </div>
 
+        <div class="installment-panel" id="installment-panel" hidden>
+          <label class="form-field">Kỳ hạn trả góp
+            <select name="installmentMonths">
+              <option value="">Chọn kỳ hạn</option>
+              <option value="3">3 tháng</option><option value="6">6 tháng</option>
+              <option value="9">9 tháng</option><option value="12">12 tháng</option>
+            </select>
+          </label>
+          <label class="form-field">Ngân hàng / đơn vị trả góp bạn muốn đăng ký
+            <input name="installmentProvider" type="text" maxlength="100" placeholder="Tên ngân hàng hoặc đơn vị tài chính" />
+          </label>
+          <p class="checkout-security-note">Không nhập số tài khoản, số CCCD hoặc mã OTP tại KCJ. Việc xác minh danh tính và OTP chỉ được thực hiện trên kênh chính thức của ngân hàng/đối tác sau khi tích hợp.</p>
+        </div>
+
+        <section class="checkout-coupon-section" aria-labelledby="checkout-coupon-title">
+          <h3 id="checkout-coupon-title">Mã giảm giá / Voucher săn sale</h3>
+          <div class="checkout-coupon-controls">
+            <input id="checkout-coupon-code" type="text" maxlength="40" placeholder="Nhập mã ưu đãi" autocomplete="off" />
+            <button id="checkout-apply-coupon" type="button">Áp dụng</button>
+            <button id="checkout-remove-coupon" type="button" hidden>Bỏ mã</button>
+          </div>
+          <p id="checkout-coupon-message" role="status"></p>
+          <div id="checkout-promotions" class="checkout-promotions"></div>
+        </section>
+
         <div class="checkout-order-preview">
           <h3>Đơn hàng của bạn</h3>
           <div id="checkout-order-items"></div>
+          <div class="checkout-order-total checkout-discount-row" id="checkout-discount-row" hidden>
+            <span>Giảm giá</span><strong id="checkout-discount-total"></strong>
+          </div>
           <div class="checkout-order-total">
             <span>Tổng thanh toán</span>
             <strong id="checkout-order-total">0₫</strong>
@@ -520,11 +530,11 @@
         </div>
 
         <p class="checkout-form-error" id="checkout-form-error" role="alert" aria-live="assertive"></p>
-        <button class="checkout-confirm-button" id="checkout-confirm-button" type="submit">
+        <button class="checkout-confirm-button" id="checkout-confirm-button" type="submit" disabled>
           Xác nhận đặt hàng
         </button>
         <p class="checkout-demo-note">
-          Đây là đơn hàng demo. Website chưa kết nối giao hàng hoặc xử lý thanh toán thật.
+          QR hiện là bản demo. Yêu cầu trả góp chưa phải xác nhận tín dụng; không gửi OTP/CCCD cho KCJ.
         </p>
       </form>
     </section>
@@ -563,7 +573,7 @@
         Tiếp tục mua sắm
       </button>
       <p class="checkout-demo-note">
-        Đơn hàng này chỉ được lưu trên thiết bị để minh họa; chưa gửi tới hệ thống bán hàng.
+        Đơn hàng đã được gửi tới KCJ Store để xử lý.
       </p>
     </section>
 
@@ -584,6 +594,7 @@
         <p class="auth-description" id="auth-description">
           Đăng nhập hoặc tạo tài khoản để tiếp tục hành trình cùng KCJ.
         </p>
+        <a class="auth-orders-link" href="/account#orders">Đơn hàng của tôi / Tra cứu mã đơn</a>
 
         <div class="auth-tabs" role="tablist" aria-label="Đăng nhập hoặc đăng ký">
           <button

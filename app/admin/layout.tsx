@@ -13,7 +13,7 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
-        <Link className="admin-brand" href="/admin">KCJ<span>.</span></Link>
+        <Link className="admin-brand" href="/account?tab=admin">KCJ<span>.</span></Link>
         <p className="admin-caption">QUẢN TRỊ CỬA HÀNG</p>
         <AdminNavigation />
       </aside>

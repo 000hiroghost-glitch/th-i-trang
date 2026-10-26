@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 
 type Variant = { id?: string; size: string; color: string | null; stock: number };
+type VariantDraft = { size: string; color: string; stock: string };
 type Category = { id: string; name: string; slug: string };
 type Product = {
   id: string;
@@ -15,7 +16,22 @@ type Product = {
   variants: Variant[];
 };
 
-const blankForm = { name: "", price: "", description: "", image: "", categoryId: "", variants: "S, Đen, 0" };
+const blankForm = { name: "", price: "", description: "", image: "", categoryId: "" };
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const AVAILABLE_SIZES = ["S", "M", "L", "XL", "XXL"];
+
+function readImageFile(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") resolve(reader.result);
+      else reject(new Error("Không thể đọc tệp ảnh."));
+    };
+    reader.onerror = () => reject(new Error("Không thể đọc tệp ảnh."));
+    reader.readAsDataURL(file);
+  });
+}
 
 export default function ProductManager({
   initialProducts,
@@ -26,9 +42,11 @@ export default function ProductManager({
 }) {
   const [products, setProducts] = useState(initialProducts);
   const [form, setForm] = useState(blankForm);
+  const [variants, setVariants] = useState<VariantDraft[]>([{ size: "S", color: "", stock: "0" }]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
+  const [imageInputKey, setImageInputKey] = useState(0);
 
   function startEditing(product: Product) {
     setEditingId(product.id);
@@ -38,16 +56,40 @@ export default function ProductManager({
       description: product.description || "",
       image: product.images[0] || "",
       categoryId: product.categoryId,
-      variants: product.variants.map(variant =>
-        [variant.size, variant.color || "", variant.stock].join(", "),
-      ).join("\n"),
     });
+    setVariants(product.variants.map(variant => ({
+      size: variant.size,
+      color: variant.color || "",
+      stock: String(variant.stock),
+    })));
     setMessage("");
   }
 
   function resetForm() {
     setEditingId(null);
     setForm({ ...blankForm, categoryId: categories[0]?.id || "" });
+    setVariants([{ size: "S", color: "", stock: "0" }]);
+    setImageInputKey(key => key + 1);
+    setMessage("");
+  }
+
+  async function selectImage(file: File | undefined) {
+    if (!file) return;
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      setMessage("Ảnh phải có định dạng JPEG, PNG hoặc WebP.");
+      return;
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      setMessage("Kích thước ảnh tối đa là 2 MiB.");
+      return;
+    }
+    try {
+      const image = await readImageFile(file);
+      setForm(current => ({ ...current, image }));
+      setMessage("");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Không thể đọc tệp ảnh.");
+    }
   }
 
   async function saveProduct(event: FormEvent<HTMLFormElement>) {
@@ -55,24 +97,28 @@ export default function ProductManager({
     setSaving(true);
     setMessage("");
     try {
-      const variants = form.variants.split(/\r?\n/).filter(line => line.trim()).map(line => {
-        const [size, color = "", stockText = "0"] = line.split(",").map(value => value.trim());
-        const stock = Number(stockText);
-        if (!size || !Number.isInteger(stock) || stock < 0) {
-          throw new Error("Biến thể cần có định dạng: Size, Màu, Tồn kho.");
+      const productVariants = variants.map(variant => {
+        const stock = Number(variant.stock);
+        if (!variant.size || !Number.isInteger(stock) || stock < 0) {
+          throw new Error("Vui lòng chọn size và nhập tồn kho là số nguyên không âm cho từng biến thể.");
         }
-        return { size, color: color || null, stock };
+        return { size: variant.size, color: variant.color.trim() || null, stock };
       });
+      if (!productVariants.length) throw new Error("Hãy thêm ít nhất một biến thể.");
+      const variantKeys = productVariants.map(variant => `${variant.size}:${variant.color || ""}`);
+      if (new Set(variantKeys).size !== variantKeys.length) {
+        throw new Error("Không thể có hai biến thể trùng size và màu.");
+      }
       const payload = {
         name: form.name.trim(),
         price: Number(form.price),
         description: form.description.trim(),
         images: [form.image.trim()],
         categoryId: form.categoryId,
-        variants,
+        variants: productVariants,
       };
       if (!Number.isFinite(payload.price) || payload.price < 0 || !payload.images[0]) {
-        throw new Error("Vui lòng nhập giá và URL hình ảnh hợp lệ.");
+        throw new Error("Vui lòng nhập giá và chọn ảnh sản phẩm.");
       }
       const response = await fetch(
         editingId ? `/api/admin/products/${encodeURIComponent(editingId)}` : "/api/admin/products",
@@ -105,11 +151,87 @@ export default function ProductManager({
           <option value="" disabled>Chọn danh mục</option>
           {categories.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}
         </select></label>
-        <label>URL hình ảnh<input required type="url" value={form.image} onChange={event => setForm({ ...form, image: event.target.value })} /></label>
+        <div className="admin-wide admin-image-field">
+          <label htmlFor="product-image">Ảnh sản phẩm (JPEG, PNG hoặc WebP; tối đa 2 MiB)
+            <input
+              key={imageInputKey}
+              id="product-image"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={event => selectImage(event.currentTarget.files?.[0])}
+            />
+          </label>
+          {form.image && <img className="admin-image-preview" src={form.image} alt="Xem trước ảnh sản phẩm" />}
+        </div>
         <label className="admin-wide">Mô tả<textarea value={form.description} onChange={event => setForm({ ...form, description: event.target.value })} /></label>
-        <label className="admin-wide">Biến thể (mỗi dòng: Size, Màu, Tồn kho)
-          <textarea required value={form.variants} onChange={event => setForm({ ...form, variants: event.target.value })} />
-        </label>
+        <fieldset className="admin-wide admin-variant-fieldset">
+          <legend>Biến thể sản phẩm</legend>
+          <div className="admin-variant-table-wrap">
+            <table className="admin-table admin-variant-table">
+              <thead><tr><th>Size</th><th>Màu sắc</th><th>Tồn kho</th><th></th></tr></thead>
+              <tbody>
+                {variants.map((variant, index) => (
+                  <tr key={index}>
+                    <td>
+                      <select
+                        required
+                        aria-label={`Size biến thể ${index + 1}`}
+                        value={variant.size}
+                        onChange={event => setVariants(current => current.map((item, itemIndex) =>
+                          itemIndex === index ? { ...item, size: event.target.value } : item,
+                        ))}
+                      >
+                        {!AVAILABLE_SIZES.includes(variant.size) && <option value={variant.size}>{variant.size}</option>}
+                        {AVAILABLE_SIZES.map(size => <option key={size} value={size}>{size}</option>)}
+                      </select>
+                    </td>
+                    <td>
+                      <input
+                        aria-label={`Màu biến thể ${index + 1}`}
+                        maxLength={40}
+                        placeholder="Ví dụ: Đen"
+                        value={variant.color}
+                        onChange={event => setVariants(current => current.map((item, itemIndex) =>
+                          itemIndex === index ? { ...item, color: event.target.value } : item,
+                        ))}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        required
+                        aria-label={`Tồn kho biến thể ${index + 1}`}
+                        min="0"
+                        step="1"
+                        type="number"
+                        value={variant.stock}
+                        onChange={event => setVariants(current => current.map((item, itemIndex) =>
+                          itemIndex === index ? { ...item, stock: event.target.value } : item,
+                        ))}
+                      />
+                    </td>
+                    <td>
+                      <button
+                        className="admin-button admin-button-secondary"
+                        type="button"
+                        aria-label={`Xóa biến thể ${index + 1}`}
+                        onClick={() => setVariants(current => current.filter((_, itemIndex) => itemIndex !== index))}
+                      >
+                        Xóa
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <button
+            className="admin-button admin-button-secondary"
+            type="button"
+            onClick={() => setVariants(current => [...current, { size: "S", color: "", stock: "0" }])}
+          >
+            Thêm biến thể
+          </button>
+        </fieldset>
         <div className="admin-wide">
           <button className="admin-button" type="submit" disabled={saving || categories.length === 0}>
             {saving ? "Đang lưu..." : editingId ? "Lưu thay đổi" : "Thêm sản phẩm"}

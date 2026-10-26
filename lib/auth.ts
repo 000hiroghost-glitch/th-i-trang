@@ -7,16 +7,22 @@ export async function getCurrentUser() {
   const claims = await verifySessionToken(cookieStore.get(SESSION_COOKIE)?.value);
   if (!claims) return null;
 
-  return prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { id: claims.sub },
     select: {
       id: true,
       email: true,
       fullName: true,
       phone: true,
+      avatar: true,
       role: true,
+      isBlocked: true,
+      sessionVersion: true,
     },
   });
+  if (!user || user.isBlocked || user.sessionVersion !== claims.sessionVersion) return null;
+  const { isBlocked: _isBlocked, sessionVersion: _sessionVersion, ...sessionUser } = user;
+  return sessionUser;
 }
 
 export async function getAdminUser() {

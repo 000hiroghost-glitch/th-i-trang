@@ -8,6 +8,7 @@ export default async function AdminUsersPage() {
       fullName: true,
       email: true,
       role: true,
+      isBlocked: true,
       createdAt: true,
     },
     orderBy: { createdAt: "desc" },

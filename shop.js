@@ -61,7 +61,11 @@
     variantList.setAttribute("aria-label", `Size và màu của ${product.name}`);
     product.variants.forEach(variant => {
       const item = document.createElement("li");
-      item.textContent = [variant.size, variant.color].filter(Boolean).join(" · ");
+      item.textContent = [
+        variant.size,
+        variant.color,
+        variant.stock > 0 ? `Còn ${variant.stock}` : "Hết hàng",
+      ].filter(Boolean).join(" · ");
       variantList.append(item);
     });
 
@@ -70,20 +74,27 @@
     sizeLabel.textContent = "Size";
     const sizeSelect = document.createElement("select");
     sizeSelect.setAttribute("aria-label", `Chọn Size cho ${product.name}`);
-    const sizes = [...new Set(product.variants.map(variant => variant.size))];
-    sizes.forEach(size => {
+    product.variants.forEach(variant => {
       const option = document.createElement("option");
-      option.value = size;
-      option.textContent = size;
+      option.value = variant.id;
+      option.textContent = [
+        variant.size,
+        variant.color,
+        variant.stock > 0 ? `Còn ${variant.stock}` : "Hết hàng",
+      ].filter(Boolean).join(" · ");
+      option.disabled = variant.stock <= 0;
       sizeSelect.append(option);
     });
+    sizeSelect.value = product.variants.find(variant => variant.stock > 0)?.id || "";
     sizeLabel.append(sizeSelect);
 
     const addButton = document.createElement("button");
     addButton.className = "buy-button";
     addButton.type = "button";
     addButton.textContent = "Thêm vào giỏ";
-    addButton.disabled = sizes.length === 0;
+    const availableStock = product.variants.reduce((total, variant) => total + variant.stock, 0);
+    addButton.disabled = availableStock === 0;
+    if (availableStock === 0) addButton.textContent = "Hết hàng";
     addButton.addEventListener("click", () => {
       window.KCJSite.addToCart(product, sizeSelect.value);
     });
@@ -175,6 +186,9 @@
         category: product.category?.slug || "",
         categoryLabel: product.category?.name || "KCJ",
         variants: Array.isArray(product.variants) ? product.variants : [],
+        stock: Array.isArray(product.variants)
+          ? product.variants.reduce((total, variant) => total + variant.stock, 0)
+          : 0,
       }));
       productTotal.textContent = `${products.length} sản phẩm`;
       grid.setAttribute("aria-busy", "false");

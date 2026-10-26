@@ -20,16 +20,58 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum Gender {
+  FEMALE
+  MALE
+  OTHER
+  UNSPECIFIED
+}
+
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  fullName  String?
-  phone     String?
-  address   String?
-  role      Role     @default(USER)
-  orders    Order[]
-  createdAt DateTime @default(now())
+  id                         String                  @id @default(uuid())
+  email                      String                  @unique
+  password                   String
+  fullName                   String?
+  phone                      String?
+  address                    String?
+  avatar                     String?
+  dateOfBirth                DateTime?               @db.Date
+  gender                     Gender                  @default(UNSPECIFIED)
+  allowMarketingEmails       Boolean                 @default(false)
+  orderStatusNotifications   Boolean                 @default(true)
+  preferredLanguage          String                  @default("vi")
+  isBlocked                  Boolean                 @default(false)
+  sessionVersion             Int                     @default(0)
+  role                       Role                    @default(USER)
+  orders                     Order[]
+  addresses                  AccountAddress[]
+  passwordResetTokens        PasswordResetToken[]
+  createdAt                  DateTime                @default(now())
+  updatedAt                  DateTime                @updatedAt
+}
+
+model AccountAddress {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label       String
+  recipient   String
+  phone       String
+  address     String
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  shippingOrders Order[]
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
 }
 
 model Category {
@@ -37,6 +79,24 @@ model Category {
   name     String
   slug     String    @unique
   products Product[]
+}
+
+model Banner {
+  id          String   @id @default(uuid())
+  eyebrow     String?
+  title       String
+  description String?
+  image       String
+  link        String?
+  linkText    String?
+  couponCode  String?
+  discountPercent Int?
+  startsAt    DateTime?
+  endsAt      DateTime?
+  active      Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Product {
@@ -69,6 +129,16 @@ model Order {
   status          OrderStatus @default(PENDING)
   shippingAddress String
   phone           String
+  customerName    String?
+  paymentMethod   String      @default("COD")
+  isInstallment   Boolean     @default(false)
+  installmentMonths Int?
+  installmentProvider String?
+  installmentVerificationStatus String?
+  discountCode    String?
+  discountAmount  Float       @default(0)
+  shippingAddressId String?
+  shippingAddressRecord AccountAddress? @relation(fields: [shippingAddressId], references: [id], onDelete: SetNull)
   items           OrderItem[]
   createdAt       DateTime    @default(now())
 }

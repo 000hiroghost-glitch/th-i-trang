@@ -4,10 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const links = [
-  { href: "/admin", label: "Tổng quan" },
-  { href: "/admin/products", label: "Quản lý sản phẩm" },
-  { href: "/admin/orders", label: "Quản lý đơn hàng" },
-  { href: "/admin/users", label: "Quản lý người dùng" },
+  { href: "/account?tab=admin", adminPath: "/admin", label: "Tổng quan" },
+  { href: "/account?tab=admin&section=products", adminPath: "/admin/products", label: "Quản lý sản phẩm" },
+  { href: "/account?tab=admin&section=banners", adminPath: "/admin/banners", label: "Banner & khuyến mãi" },
+  { href: "/account?tab=admin&section=orders", adminPath: "/admin/orders", label: "Quản lý đơn hàng" },
+  { href: "/account?tab=admin&section=users", adminPath: "/admin/users", label: "Quản lý người dùng" },
 ];
 
 export default function AdminNavigation() {
@@ -16,9 +17,9 @@ export default function AdminNavigation() {
   return (
     <nav aria-label="Quản trị">
       {links.map(link => {
-        const active = link.href === "/admin"
+        const active = link.adminPath === "/admin"
           ? pathname === "/admin"
-          : pathname.startsWith(link.href);
+          : pathname.startsWith(link.adminPath);
         return (
           <Link
             key={link.href}

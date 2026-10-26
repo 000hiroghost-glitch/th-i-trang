@@ -12,6 +12,7 @@ export async function GET() {
       name: user.fullName || user.email.split("@")[0],
       phone: user.phone,
       role: user.role,
+      avatar: user.avatar,
     },
   });
 }

@@ -4,6 +4,7 @@ export const SESSION_MAX_AGE = 60 * 60 * 8;
 export interface SessionClaims {
   sub: string;
   role: "USER" | "ADMIN";
+  sessionVersion: number;
   exp: number;
 }
 
@@ -36,10 +37,15 @@ async function signingKey() {
   );
 }
 
-export async function createSessionToken(user: { id: string; role: SessionClaims["role"] }) {
+export async function createSessionToken(user: {
+  id: string;
+  role: SessionClaims["role"];
+  sessionVersion?: number;
+}) {
   const claims: SessionClaims = {
     sub: user.id,
     role: user.role,
+    sessionVersion: user.sessionVersion ?? 0,
     exp: Math.floor(Date.now() / 1000) + SESSION_MAX_AGE,
   };
   const payload = encodeBase64Url(new TextEncoder().encode(JSON.stringify(claims)));
@@ -78,11 +84,15 @@ export async function verifySessionToken(token: string | undefined): Promise<Ses
       typeof claims.sub !== "string" ||
       (claims.role !== "USER" && claims.role !== "ADMIN") ||
       typeof claims.exp !== "number" ||
+      ("sessionVersion" in claims && (typeof claims.sessionVersion !== "number" || !Number.isInteger(claims.sessionVersion))) ||
       claims.exp <= Math.floor(Date.now() / 1000)
     ) {
       return null;
     }
-    return claims as SessionClaims;
+    return {
+      ...claims,
+      sessionVersion: "sessionVersion" in claims ? claims.sessionVersion as number : 0,
+    } as SessionClaims;
   } catch {
     return null;
   }

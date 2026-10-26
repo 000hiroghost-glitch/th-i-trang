@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminUser } from "../../../../lib/auth";
 import { prisma } from "../../../../lib/prisma";
 
+const MAX_IMAGE_DATA_URL_LENGTH = 3 * 1024 * 1024;
+
+function validProductImage(image: unknown): image is string {
+  return typeof image === "string" && (
+    (image.length > 0 && image.length <= 2048) ||
+    (image.length <= MAX_IMAGE_DATA_URL_LENGTH &&
+      /^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(image))
+  );
+}
+
 function validProductInput(body: unknown): body is {
   name: string;
   price: number;
@@ -25,9 +35,10 @@ function validProductInput(body: unknown): body is {
     "images" in body &&
     Array.isArray(body.images) &&
     body.images.length > 0 &&
-    body.images.every((image: unknown) => typeof image === "string" && image.length <= 2048) &&
+    body.images.every(validProductImage) &&
     "variants" in body &&
     Array.isArray(body.variants) &&
+    body.variants.length > 0 &&
     body.variants.every((variant: unknown) =>
       typeof variant === "object" &&
       variant !== null &&

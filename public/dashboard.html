@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Quản lý thông tin cá nhân và xem lịch sử đơn hàng KCJ." />
     <meta name="theme-color" content="#f8f7f4" />
+    <meta http-equiv="refresh" content="0; url=/account" />
     <title>Tài khoản của tôi — KCJ</title>
+    <script>try{document.documentElement.classList.toggle("dark",localStorage.getItem("kcj-theme")==="dark")}catch(error){console.error("Không thể tải giao diện đã lưu:",error)}</script>
     <link rel="stylesheet" href="style.css" />
     <script src="page-common.js" defer></script>
   </head>
@@ -21,15 +23,15 @@
       <section class="dashboard-gate" id="dashboard-gate">
         <p class="eyebrow">CHÀO MỪNG BẠN</p>
         <h2>Đăng nhập để xem tài khoản</h2>
-        <p>Hãy đăng nhập hoặc tạo tài khoản demo để quản lý hồ sơ và xem lại lịch sử đơn hàng đã lưu trên thiết bị.</p>
+        <p>Hãy đăng nhập hoặc tạo tài khoản để quản lý hồ sơ và xem lại lịch sử đơn hàng.</p>
         <button class="button button-dark" type="button" data-open-auth>Đăng nhập / Đăng ký</button>
-        <p class="checkout-demo-note">Chức năng tài khoản chỉ hoạt động trên thiết bị này, chưa kết nối backend.</p>
+        <p class="checkout-demo-note">Thông tin tài khoản được lưu an toàn trên máy chủ.</p>
       </section>
       <section class="dashboard-profile" id="dashboard-profile-section" hidden>
         <div class="dashboard-section-heading"><div><p class="eyebrow">HỒ SƠ CỦA BẠN</p><h2>Thông tin cá nhân</h2></div><button class="text-button" id="dashboard-logout" type="button">Đăng xuất</button></div>
         <form class="dashboard-profile-form" id="dashboard-profile">
           <label class="form-field"><span>Họ và tên</span><input name="name" type="text" minlength="2" maxlength="100" autocomplete="name" required /></label>
-          <label class="form-field"><span>Email</span><input name="email" type="email" readonly aria-describedby="email-help" /><small id="email-help">Email đăng nhập demo không thể chỉnh sửa tại đây.</small></label>
+          <label class="form-field"><span>Email</span><input name="email" type="email" readonly aria-describedby="email-help" /><small id="email-help">Email đăng nhập không thể chỉnh sửa tại đây.</small></label>
           <label class="form-field"><span>Số điện thoại (không bắt buộc)</span><input name="phone" type="tel" autocomplete="tel" inputmode="tel" pattern="(?:0|\+?84)[0-9]{9,10}" title="Để trống hoặc nhập số bắt đầu bằng 0 hoặc +84." /></label>
           <button class="checkout-confirm-button" type="submit">Lưu thông tin</button>
         </form>

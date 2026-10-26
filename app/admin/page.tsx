@@ -15,16 +15,16 @@ export default async function AdminPage() {
         <div><p className="admin-muted">KCJ STORE / TỔNG QUAN</p><h1>Chào mừng đến Admin</h1></div>
       </header>
       <section className="admin-overview-grid" aria-label="Thống kê cửa hàng">
-        <Link className="admin-overview-card" href="/admin/products">
+        <Link className="admin-overview-card" href="/account?tab=admin&section=products">
           <span>Sản phẩm</span><strong>{productCount}</strong>
         </Link>
-        <Link className="admin-overview-card" href="/admin/orders">
+        <Link className="admin-overview-card" href="/account?tab=admin&section=orders">
           <span>Đơn hàng</span><strong>{orderCount}</strong>
         </Link>
-        <Link className="admin-overview-card" href="/admin/users">
+        <Link className="admin-overview-card" href="/account?tab=admin&section=users">
           <span>Người dùng</span><strong>{userCount}</strong>
         </Link>
-        <Link className="admin-overview-card" href="/admin/orders">
+        <Link className="admin-overview-card" href="/account?tab=admin&section=orders">
           <span>Đơn chờ xử lý</span><strong>{pendingOrderCount}</strong>
         </Link>
       </section>

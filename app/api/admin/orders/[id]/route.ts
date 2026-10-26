@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminUser } from "../../../../../lib/auth";
-import { prisma } from "../../../../../lib/prisma";
+import {
+  changeOrderStatus,
+  InsufficientStockError,
+  OrderConflictError,
+  OrderNotFoundError,
+} from "../../../../../lib/order-status";
 
 const orderStatuses = ["PENDING", "PAID", "SHIPPED", "COMPLETED", "CANCELLED"] as const;
 
@@ -28,12 +33,17 @@ export async function PATCH(
   }
 
   const { id } = await context.params;
-  const result = await prisma.order.updateMany({
-    where: { id },
-    data: { status: body.status as (typeof orderStatuses)[number] },
-  });
-  if (result.count === 0) {
-    return NextResponse.json({ error: "Không tìm thấy đơn hàng." }, { status: 404 });
+  try {
+    await changeOrderStatus(id, body.status as (typeof orderStatuses)[number]);
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    if (error instanceof OrderNotFoundError) {
+      return NextResponse.json({ error: error.message }, { status: 404 });
+    }
+    if (error instanceof OrderConflictError || error instanceof InsufficientStockError) {
+      return NextResponse.json({ error: error.message }, { status: 409 });
+    }
+    console.error("Không thể cập nhật trạng thái đơn hàng:", error);
+    return NextResponse.json({ error: "Không thể cập nhật đơn hàng." }, { status: 500 });
   }
-  return NextResponse.json({ success: true });
 }

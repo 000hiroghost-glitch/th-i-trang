@@ -2,17 +2,25 @@
 
 (() => {
   const CART_KEY = "kcj-cart-v1";
-  const ORDER_KEY = "kcj-order-history-v1";
   const currency = new Intl.NumberFormat("vi-VN");
   const pageName = document.body.dataset.page || "";
   let cart = [];
   let authenticatedUser = null;
-  try {
-    localStorage.removeItem("kcj-demo-account-v1");
-    localStorage.removeItem("kcj-demo-user-v1");
-  } catch (error) {
-    console.error("Không thể xóa thông tin đăng nhập demo đã lưu:", error);
-  }
+  const readAuthResponse = async (response, action) => {
+    let result;
+    try {
+      result = await response.json();
+    } catch {
+      throw new Error(`Máy chủ không trả về JSON hợp lệ khi ${action} (HTTP ${response.status}).`);
+    }
+    if (!result || typeof result !== "object") {
+      throw new Error(`Máy chủ không trả về dữ liệu hợp lệ khi ${action} (HTTP ${response.status}).`);
+    }
+    if (!response.ok) {
+      throw new Error(typeof result.error === "string" ? result.error : `Không thể ${action}.`);
+    }
+    return result;
+  };
 
   const formatPrice = value => `${currency.format(value)}₫`;
   const readStoredValue = (key, fallback) => {
@@ -51,6 +59,7 @@
           <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.8 20a7.2 7.2 0 0 1 14.4 0"></path></svg>
           <span class="account-label" id="account-label">Tài khoản</span>
         </button>
+        <a class="header-orders-link" href="/account#orders">Đơn hàng của tôi</a>
         <button class="cart-trigger" id="cart-trigger" type="button" aria-label="Mở giỏ hàng" aria-controls="cart-panel" aria-expanded="false">
           <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L21 8H6"></path><circle cx="10" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle></svg>
           <span class="cart-label">Giỏ hàng</span><span class="cart-count" id="cart-count" aria-live="polite">0</span>
@@ -60,10 +69,10 @@
     <nav class="primary-nav" aria-label="Điều hướng chính">
       <a href="index.html" data-nav-page="home">Trang chủ</a>
       <a href="shop.html" data-nav-page="shop">Cửa hàng</a>
-      <a href="about.html" data-nav-page="about">Giới thiệu</a>
+      <a href="about.html" data-nav-page="about">Giới thiệu & Chính sách</a>
       <a href="contact.html" data-nav-page="contact">Liên hệ</a>
-      <a href="policy.html" data-nav-page="policy">Chính sách</a>
-      <a href="/admin/orders" id="admin-nav-link" hidden>Quản trị</a>
+      <a href="/account#orders" data-nav-page="orders">Đơn hàng của tôi</a>
+      <a href="/account?tab=admin" id="admin-nav-link" hidden>Quản trị</a>
     </nav>`;
   const activeLink = document.querySelector(`[data-nav-page="${pageName}"]`);
   if (activeLink) {
@@ -76,7 +85,7 @@
         <div class="footer-brand"><a class="brand brand-footer" href="index.html">KCJ<span>.</span></a><p>Mặc điều bạn yêu.<br />Minimalist Streetwear, dành cho nhịp sống của bạn.</p></div>
         <div class="footer-column"><h2>Liên hệ</h2><a href="mailto:000hiroghost@gmail.com">000hiroghost@gmail.com</a><a href="tel:+84929332399">0929 332 399</a></div>
         <div class="footer-column"><h2>Ghé thăm</h2><a href="contact.html">135 Nguyễn Huệ, Quận 1</a><span>TP. Hồ Chí Minh, Việt Nam</span><span>Thứ 2 – Thứ 7, 9:00 – 18:00</span></div>
-        <div class="footer-column"><h2>Khám phá</h2><a href="index.html">Trang chủ</a><a href="shop.html">Cửa hàng</a><a href="about.html">Giới thiệu</a><a href="contact.html">Liên hệ</a><a href="policy.html">Chính sách</a><a href="dashboard.html">Tài khoản của tôi</a></div>
+        <div class="footer-column"><h2>Khám phá</h2><a href="index.html">Trang chủ</a><a href="shop.html">Cửa hàng</a><a href="about.html">Giới thiệu & Chính sách</a><a href="contact.html">Liên hệ</a><a href="/account">Tài khoản của tôi</a><a href="/account#orders">Đơn hàng của tôi</a></div>
         <div class="footer-column"><h2>Theo dõi KCJ</h2><a href="https://www.facebook.com/profile.php?id=61578550865354" target="_blank" rel="noreferrer">Facebook ↗</a><a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Instagram ↗</a></div>
       </div>
       <div class="footer-bottom"><span>© 2026 KCJ. Mọi quyền được bảo lưu.</span><span>Thiết kế bằng sự trân trọng dành cho bạn.</span></div>
@@ -95,6 +104,7 @@
         <button class="auth-close" id="auth-close" type="button" aria-label="Đóng cửa sổ tài khoản"><span aria-hidden="true">×</span></button>
         <div class="auth-brand-mark" aria-hidden="true">KCJ<span>.</span></div><p class="eyebrow">CHÀO MỪNG BẠN ĐẾN VỚI KCJ</p>
         <h2 class="auth-title" id="auth-title">Tài khoản của bạn</h2><p class="auth-description" id="auth-description">Đăng nhập hoặc tạo tài khoản để tiếp tục hành trình cùng KCJ.</p>
+        <a class="auth-orders-link" href="/account#orders">Đơn hàng của tôi / Tra cứu mã đơn</a>
         <div class="auth-tabs" role="tablist" aria-label="Đăng nhập hoặc đăng ký"><button class="auth-tab is-active" id="page-login-tab" type="button" role="tab" aria-selected="true" aria-controls="page-login-form" data-auth-view="login">Đăng nhập</button><button class="auth-tab" id="page-register-tab" type="button" role="tab" aria-selected="false" aria-controls="page-register-form" data-auth-view="register">Đăng ký</button></div>
         <form class="auth-form" id="page-login-form" role="tabpanel" aria-labelledby="page-login-tab" novalidate>
           <label class="auth-field"><span>Email</span><input name="email" type="email" autocomplete="email" maxlength="254" placeholder="ten@email.com" required /></label>
@@ -110,7 +120,6 @@
           <p class="auth-message" id="page-register-message" role="status" aria-live="polite"></p><button class="auth-submit" type="submit">Tạo tài khoản</button>
           <p class="auth-switch-copy">Đã có tài khoản? <button class="auth-switch-button" type="button" data-auth-view="login">Đăng nhập</button></p>
         </form>
-        <p class="auth-demo-note">Tài khoản chỉ dùng để minh họa trên thiết bị này. Không nhập mật khẩu đang sử dụng ở dịch vụ khác.</p>
       </section>
     </div>
     <div class="toast" id="site-toast" role="status" aria-live="polite"></div>`
@@ -309,6 +318,61 @@
     );
   };
   const dashboard = document.querySelector("#dashboard-content");
+  let orderRequestId = 0;
+  const loadDashboardOrders = async user => {
+    const requestId = ++orderRequestId;
+    const orderList = document.querySelector("#order-history-list");
+    if (!orderList) return;
+    orderList.textContent = "Đang tải đơn hàng...";
+    try {
+      const response = await fetch("/api/orders");
+      const orders = await response.json();
+      if (!response.ok) throw new Error(orders.error || "Không thể tải đơn hàng.");
+      if (requestId !== orderRequestId || session()?.id !== user.id) return;
+      document.querySelector("#dashboard-order-count").textContent = `${orders.length} đơn hàng`;
+      if (!orders.length) {
+        orderList.innerHTML = '<p class="empty-orders">Bạn chưa có đơn hàng nào. Khám phá cửa hàng để chọn món đồ yêu thích nhé.</p>';
+        return;
+      }
+      orderList.replaceChildren(...orders.map(order => {
+        const card = document.createElement("article");
+        card.className = "history-order-card";
+        const header = document.createElement("div");
+        header.className = "history-order-header";
+        const identifier = document.createElement("strong");
+        identifier.textContent = `Đơn hàng ${order.id.slice(0, 8)}`;
+        const amount = document.createElement("strong");
+        amount.textContent = formatPrice(order.totalAmount);
+        header.append(identifier, amount);
+        const date = document.createElement("p");
+        date.textContent = new Intl.DateTimeFormat("vi-VN", {
+          dateStyle: "medium",
+          timeStyle: "short",
+        }).format(new Date(order.createdAt));
+        const items = document.createElement("p");
+        items.textContent = order.items.map(item =>
+          `${item.variant.product.name} · ${item.variant.size} × ${item.quantity}`
+        ).join(", ");
+        const status = document.createElement("span");
+        status.className = "order-demo-status";
+        status.textContent = order.status;
+        card.append(header, date, items, status);
+        if (order.status === "PENDING") {
+          const cancel = document.createElement("button");
+          cancel.className = "admin-button admin-button-secondary";
+          cancel.type = "button";
+          cancel.textContent = "Hủy đơn hàng";
+          cancel.dataset.cancelOrder = order.id;
+          card.append(cancel);
+        }
+        return card;
+      }));
+    } catch (error) {
+      if (requestId !== orderRequestId) return;
+      console.error("Không thể tải đơn hàng:", error);
+      orderList.textContent = error instanceof Error ? error.message : "Không thể tải đơn hàng.";
+    }
+  };
   const renderDashboard = () => {
     if (!dashboard) return;
     const user = session();
@@ -325,45 +389,7 @@
     profileForm.elements.namedItem("name").value = user.name;
     profileForm.elements.namedItem("email").value = user.email;
     profileForm.elements.namedItem("phone").value = user.phone || "";
-    const orderList = document.querySelector("#order-history-list");
-    const allOrders = readStoredValue(ORDER_KEY, []);
-    if (!Array.isArray(allOrders)) {
-      console.error("Lịch sử đơn hàng đã lưu không đúng định dạng.");
-      showToast("Không thể hiển thị lịch sử đơn hàng đã lưu.");
-    }
-    const orders = Array.isArray(allOrders)
-      ? allOrders.filter(order => order && order.accountEmail === user.email)
-      : [];
-    document.querySelector("#dashboard-order-count").textContent = `${orders.length} đơn hàng`;
-    if (!orders.length) {
-      orderList.innerHTML = '<p class="empty-orders">Bạn chưa có đơn hàng nào được lưu cho tài khoản này. Khám phá cửa hàng để chọn món đồ yêu thích nhé.</p>';
-      return;
-    }
-    orderList.replaceChildren(...orders.map(order => {
-      const card = document.createElement("article");
-      card.className = "history-order-card";
-      const header = document.createElement("div");
-      header.className = "history-order-header";
-      const identifier = document.createElement("strong");
-      identifier.textContent = order.id || "Đơn KCJ";
-      const amount = document.createElement("strong");
-      amount.textContent = formatPrice(Number(order.total) || 0);
-      header.append(identifier, amount);
-      const date = document.createElement("p");
-      const parsedDate = new Date(order.createdAt);
-      date.textContent = Number.isNaN(parsedDate.getTime())
-        ? "Ngày đặt không xác định"
-        : new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" }).format(parsedDate);
-      const items = document.createElement("p");
-      items.textContent = Array.isArray(order.items)
-        ? order.items.map(item => `${item.name} · ${item.size} × ${item.quantity}`).join(", ")
-        : "Chi tiết sản phẩm không có sẵn.";
-      const status = document.createElement("span");
-      status.className = "order-demo-status";
-      status.textContent = "Đơn hàng demo";
-      card.append(header, date, items, status);
-      return card;
-    }));
+    loadDashboardOrders(user);
   };
 
   const openAuth = (view = "login") => {
@@ -410,7 +436,7 @@
   cartBackdrop.addEventListener("click", () => closeCart());
   document.querySelector("#account-trigger").addEventListener("click", event => {
     if (session()) {
-      window.location.href = "dashboard.html";
+      window.location.href = "/account";
       return;
     }
     authReturnFocus = event.currentTarget;
@@ -423,6 +449,25 @@
     });
   });
   document.querySelector("#auth-close").addEventListener("click", closeAuth);
+  document.querySelector("#order-history-list")?.addEventListener("click", async event => {
+    const button = event.target.closest("[data-cancel-order]");
+    if (!button) return;
+    button.disabled = true;
+    try {
+      const response = await fetch(`/api/orders/${encodeURIComponent(button.dataset.cancelOrder)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "CANCELLED" }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Không thể hủy đơn hàng.");
+      showToast("Đã hủy đơn hàng và hoàn lại tồn kho.");
+      if (session()) await loadDashboardOrders(session());
+    } catch (error) {
+      button.disabled = false;
+      showToast(error instanceof Error ? error.message : "Không thể hủy đơn hàng.");
+    }
+  });
   document.querySelectorAll("#page-login-form, #page-register-form").forEach(form => {
     form.addEventListener("input", event => {
       event.target.setCustomValidity("");
@@ -460,13 +505,12 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.value, password: password.value }),
       });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Không thể đăng nhập.");
+      const result = await readAuthResponse(response, "đăng nhập");
       authenticatedUser = result.user;
       refreshAccount();
       renderDashboard();
       message.textContent = "Đăng nhập thành công.";
-      if (authenticatedUser.role === "ADMIN") window.location.assign("/admin/orders");
+      if (authenticatedUser.role === "ADMIN") window.location.assign("/account?tab=admin");
       else window.setTimeout(closeAuth, 650);
     } catch (error) {
       message.textContent = error instanceof Error ? error.message : "Không thể đăng nhập.";
@@ -500,13 +544,12 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fullName: name.value, email: email.value, password: password.value }),
       });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Không thể tạo tài khoản.");
+      const result = await readAuthResponse(response, "đăng ký");
       authenticatedUser = result.user;
       refreshAccount();
       renderDashboard();
       message.textContent = "Tạo tài khoản thành công.";
-      window.setTimeout(() => window.location.assign("/dashboard.html"), 650);
+      window.setTimeout(() => window.location.assign("/account"), 650);
     } catch (error) {
       message.textContent = error instanceof Error ? error.message : "Không thể tạo tài khoản.";
     } finally {
@@ -576,8 +619,8 @@
       if (!response.ok) throw new Error("Server không thể kết thúc phiên.");
       authenticatedUser = null;
     } catch (error) {
-      console.error("Không thể đăng xuất tài khoản demo:", error);
-      showToast("Không thể xóa phiên tài khoản trên thiết bị.");
+      console.error("Không thể đăng xuất:", error);
+      showToast("Không thể kết thúc phiên tài khoản.");
       return;
     }
     refreshAccount();

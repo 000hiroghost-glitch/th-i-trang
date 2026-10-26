@@ -5,6 +5,17 @@ const productSearch = document.querySelector("#product-search");
 const productTotal = document.querySelector("#product-total");
 const emptySearch = document.querySelector("#empty-search");
 const categoryFilters = document.querySelector("#category-filters");
+const heroEyebrow = document.querySelector("#hero-eyebrow");
+const heroTitle = document.querySelector("#hero-title");
+const heroDescription = document.querySelector("#hero-description");
+const heroLink = document.querySelector("#hero-link");
+const heroNote = document.querySelector("#hero-note");
+const heroImage = document.querySelector("#hero-image");
+const heroImageTag = document.querySelector("#hero-image-tag");
+const heroIndex = document.querySelector("#hero-index");
+const heroBannerControls = document.querySelector("#hero-banner-controls");
+const homePromotions = document.querySelector("#home-promotions");
+const homePromotionGrid = document.querySelector("#home-promotion-grid");
 const cartTrigger = document.querySelector("#cart-trigger");
 const cartPanel = document.querySelector("#cart-panel");
 const cartBackdrop = document.querySelector("#cart-backdrop");
@@ -43,8 +54,21 @@ const checkoutClose = document.querySelector("#checkout-close");
 const checkoutOrderItems = document.querySelector("#checkout-order-items");
 const checkoutOrderTotal = document.querySelector("#checkout-order-total");
 const checkoutFormError = document.querySelector("#checkout-form-error");
+const checkoutConfirmButton = document.querySelector("#checkout-confirm-button");
 const qrDemoPanel = document.querySelector("#qr-demo-panel");
 const qrTransferNote = document.querySelector("#qr-transfer-note");
+const installmentPanel = document.querySelector("#installment-panel");
+const savedAddressCard = document.querySelector("#saved-address-card");
+const savedAddressSelect = document.querySelector("#saved-address-select");
+const savedAddressPreview = document.querySelector("#saved-address-preview");
+const noSavedAddressNote = document.querySelector("#no-saved-address-note");
+const checkoutCouponCode = document.querySelector("#checkout-coupon-code");
+const checkoutCouponMessage = document.querySelector("#checkout-coupon-message");
+const checkoutPromotions = document.querySelector("#checkout-promotions");
+const checkoutDiscountRow = document.querySelector("#checkout-discount-row");
+const checkoutDiscountTotal = document.querySelector("#checkout-discount-total");
+const checkoutApplyCoupon = document.querySelector("#checkout-apply-coupon");
+const checkoutRemoveCoupon = document.querySelector("#checkout-remove-coupon");
 const orderPanel = document.querySelector("#order-panel");
 const orderBackdrop = document.querySelector("#order-backdrop");
 const orderClose = document.querySelector("#order-close");
@@ -71,14 +95,31 @@ const registerPasswordConfirm = document.querySelector(
   "#register-password-confirm"
 );
 const toast = document.querySelector("#toast");
+const readAuthResponse = async (response, action) => {
+  let result;
+  try {
+    result = await response.json();
+  } catch {
+    throw new Error(`Máy chủ không trả về JSON hợp lệ khi ${action} (HTTP ${response.status}).`);
+  }
+  if (!result || typeof result !== "object") {
+    throw new Error(`Máy chủ không trả về dữ liệu hợp lệ khi ${action} (HTTP ${response.status}).`);
+  }
+  if (!response.ok) {
+    throw new Error(typeof result.error === "string" ? result.error : `Không thể ${action}.`);
+  }
+  return result;
+};
 
 const currency = new Intl.NumberFormat("vi-VN");
 const cart = new Map();
 const cartStorageKey = "kcj-cart-v1";
 let productCards = [];
+let productCatalog = [];
 let activeCategory = "all";
 let selectedProduct = null;
 let selectedSize = "";
+let selectedVariantId = "";
 let selectedQuantity = 1;
 let returnFocusElement = null;
 let authReturnFocusElement = null;
@@ -86,6 +127,13 @@ let toastTimeout;
 let storageAvailable = true;
 let storageWarningShown = false;
 let checkoutDraftOrderId = "";
+let checkoutAddresses = [];
+let selectedShippingAddressId = null;
+let appliedCoupon = null;
+let authenticatedUser = null;
+let homeBanners = [];
+let activeBannerIndex = 0;
+let bannerRotationTimer;
 
 const refreshHomeAccount = user => {
   const label = document.querySelector(".account-label");
@@ -98,294 +146,6 @@ const refreshHomeAccount = user => {
     user?.name ? `Tài khoản ${user.name}` : "Mở đăng nhập hoặc đăng ký"
   );
 };
-
-const productCatalog = [
-  {
-    id: "ao-thun-cotton-mem",
-    name: "Áo thun cotton mềm",
-    price: 329000,
-    category: "ao",
-    categoryLabel: "ÁO · COTTON 100%",
-    image:
-      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85",
-    alt: "Áo thun cotton màu trắng kiểu dáng tối giản",
-    material: "Cotton 100%",
-    fit: "Suông thoải mái",
-    care: "Giặt máy ở nhiệt độ thấp, lộn trái khi giặt.",
-    description: "Áo thun mềm mại, thoáng mát, dễ kết hợp trong mọi ngày.",
-    badge: "BÁN CHẠY",
-  },
-  {
-    id: "ao-so-mi-linen",
-    name: "Áo sơ mi linen",
-    price: 589000,
-    category: "ao",
-    categoryLabel: "ÁO · LINEN PHA",
-    image:
-      "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=900&q=85",
-    alt: "Áo sơ mi linen phong cách thanh lịch",
-    material: "Linen pha cotton",
-    fit: "Suông vừa",
-    care: "Giặt nhẹ với nước mát, phơi nơi thoáng gió.",
-    description: "Chất vải linen thoáng nhẹ, phù hợp với phong cách thanh lịch.",
-    badge: "MỚI",
-  },
-  {
-    id: "quan-ong-rong-thanh-lich",
-    name: "Quần ống rộng thanh lịch",
-    price: 649000,
-    category: "quan",
-    categoryLabel: "QUẦN · DÁNG RỘNG",
-    image:
-      "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=900&q=85",
-    alt: "Quần dài dáng rộng màu trung tính",
-    material: "Cotton pha tái chế",
-    fit: "Ống rộng, cạp vừa",
-    care: "Giặt riêng với màu tương tự, không dùng chất tẩy.",
-    description: "Phom quần rộng thoải mái, dễ phối đồ đi làm hoặc dạo phố.",
-  },
-  {
-    id: "ao-khoac-det-nhe",
-    name: "Áo khoác dệt nhẹ",
-    price: 799000,
-    category: "ao-khoac",
-    categoryLabel: "ÁO KHOÁC · DỆT NHẸ",
-    image:
-      "https://images.unsplash.com/photo-1548126032-079a0fb0099d?auto=format&fit=crop&w=900&q=85",
-    alt: "Áo khoác thời trang phong cách tối giản",
-    material: "Cotton pha acrylic",
-    fit: "Suông vừa, dễ phối lớp",
-    care: "Giặt tay nhẹ nhàng, phơi ngang để giữ phom.",
-    description: "Lớp khoác nhẹ nhàng cho những ngày thời tiết dịu mát.",
-    badge: "-15%",
-  },
-  {
-    id: "ao-thun-oversize-kcj",
-    name: "Áo thun oversize KCJ",
-    price: 359000,
-    category: "ao",
-    categoryLabel: "ÁO · DÁNG OVERSIZE",
-    image:
-      "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=900&q=85",
-    alt: "Áo thun oversize phong cách đường phố",
-    material: "Cotton compact 100%",
-    fit: "Oversize",
-    care: "Giặt máy ở nhiệt độ thấp, không sấy nóng.",
-    description: "Phom rộng năng động, tạo cảm giác thoải mái suốt ngày dài.",
-  },
-  {
-    id: "hoodie-cotton-classic",
-    name: "Hoodie cotton classic",
-    price: 729000,
-    category: "ao",
-    categoryLabel: "ÁO · NỈ COTTON",
-    image:
-      "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=900&q=85",
-    alt: "Áo hoodie cotton dáng cơ bản",
-    material: "Nỉ cotton pha",
-    fit: "Suông rộng",
-    care: "Lộn trái áo khi giặt và tránh ủi trực tiếp lên hình in.",
-    description: "Hoodie mềm ấm, thiết kế tối giản để mặc quanh năm.",
-    badge: "BÁN CHẠY",
-  },
-  {
-    id: "ao-polo-essential",
-    name: "Áo polo essential",
-    price: 429000,
-    category: "ao",
-    categoryLabel: "ÁO · PIQUÉ COTTON",
-    image:
-      "https://images.unsplash.com/photo-1622445275463-afa2ab738c34?auto=format&fit=crop&w=900&q=85",
-    alt: "Áo polo cotton màu trung tính",
-    material: "Cotton piqué",
-    fit: "Regular fit",
-    care: "Giặt nhẹ, dựng cổ áo khi phơi.",
-    description: "Chiếc polo gọn gàng, phù hợp từ ngày thường đến cuối tuần.",
-  },
-  {
-    id: "quan-jeans-straight",
-    name: "Quần jeans straight",
-    price: 699000,
-    category: "quan",
-    categoryLabel: "QUẦN · DENIM",
-    image:
-      "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=900&q=85",
-    alt: "Quần jeans xanh ống đứng",
-    material: "Denim cotton",
-    fit: "Ống đứng, cạp vừa",
-    care: "Lộn trái, giặt với nước lạnh để giữ màu denim.",
-    description: "Phom ống đứng cổ điển, dễ phối với áo thun và sơ mi.",
-  },
-  {
-    id: "quan-jeans-ong-rong",
-    name: "Quần jeans ống rộng",
-    price: 749000,
-    category: "quan",
-    categoryLabel: "QUẦN · DENIM RỘNG",
-    image:
-      "https://images.unsplash.com/photo-1548883354-94bcfe321cbb?auto=format&fit=crop&w=900&q=85",
-    alt: "Quần jeans dáng rộng thời trang",
-    material: "Denim cotton pha",
-    fit: "Ống rộng, cạp cao",
-    care: "Giặt riêng lần đầu, tránh phơi trực tiếp dưới nắng gắt.",
-    description: "Dáng rộng hiện đại với phần cạp cao tôn dáng.",
-  },
-  {
-    id: "chan-vay-midi",
-    name: "Chân váy midi mềm",
-    price: 559000,
-    category: "vay",
-    categoryLabel: "VÁY · MIDI",
-    image:
-      "https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?auto=format&fit=crop&w=900&q=85",
-    alt: "Chân váy midi nữ tính",
-    material: "Rayon pha",
-    fit: "Dáng chữ A, dài midi",
-    care: "Giặt tay hoặc giặt máy ở chế độ đồ mỏng.",
-    description: "Chân váy mềm rủ nhẹ, chuyển động tự nhiên theo từng bước chân.",
-    badge: "MỚI",
-  },
-  {
-    id: "vay-linen-daily",
-    name: "Váy linen daily",
-    price: 829000,
-    category: "vay",
-    categoryLabel: "VÁY · LINEN",
-    image:
-      "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=900&q=85",
-    alt: "Váy linen dáng suông nhẹ",
-    material: "Linen pha viscose",
-    fit: "Dáng suông, dài qua gối",
-    care: "Giặt nhẹ bằng nước mát, ủi ở nhiệt độ thấp.",
-    description: "Thiết kế thoáng mát, nhẹ nhàng cho những ngày cần sự thoải mái.",
-  },
-  {
-    id: "ao-khoac-denim",
-    name: "Áo khoác denim vintage",
-    price: 899000,
-    category: "ao-khoac",
-    categoryLabel: "ÁO KHOÁC · DENIM",
-    image:
-      "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=900&q=85",
-    alt: "Áo khoác denim xanh kiểu vintage",
-    material: "Denim cotton",
-    fit: "Suông cổ điển",
-    care: "Lộn trái áo khi giặt, giặt riêng với đồ sáng màu.",
-    description: "Áo khoác denim cá tính, dễ dàng kết hợp nhiều phong cách.",
-  },
-  {
-    id: "blazer-minimal",
-    name: "Blazer minimal",
-    price: 1090000,
-    category: "ao-khoac",
-    categoryLabel: "ÁO KHOÁC · BLAZER",
-    image:
-      "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=900&q=85",
-    alt: "Áo blazer phom tối giản",
-    material: "Polyester pha rayon",
-    fit: "Suông nhẹ, vai tự nhiên",
-    care: "Ưu tiên giặt khô để giữ phom áo.",
-    description: "Blazer phom nhẹ với đường cắt gọn gàng cho phong cách hiện đại.",
-  },
-  {
-    id: "cardigan-knit",
-    name: "Cardigan knit nhẹ",
-    price: 679000,
-    category: "ao-khoac",
-    categoryLabel: "ÁO KHOÁC · LEN DỆT",
-    image:
-      "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&w=900&q=85",
-    alt: "Áo cardigan dệt kim nhẹ",
-    material: "Cotton pha len",
-    fit: "Suông thoải mái",
-    care: "Giặt tay nhẹ, phơi ngang trên mặt phẳng.",
-    description: "Lớp cardigan mềm nhẹ để phối cùng trang phục thường ngày.",
-  },
-  {
-    id: "tui-tote-canvas",
-    name: "Túi tote canvas KCJ",
-    price: 289000,
-    category: "phu-kien",
-    categoryLabel: "PHỤ KIỆN · TÚI",
-    image:
-      "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=900&q=85",
-    alt: "Túi tote vải canvas tiện dụng",
-    material: "Canvas cotton dày",
-    fit: "Kích thước 36 × 40 cm",
-    care: "Giặt tay, không ngâm lâu.",
-    description: "Túi vải gọn nhẹ, tiện mang theo khi đi học hoặc dạo phố.",
-  },
-  {
-    id: "mu-luoi-trai-basic",
-    name: "Mũ lưỡi trai basic",
-    price: 249000,
-    category: "phu-kien",
-    categoryLabel: "PHỤ KIỆN · MŨ",
-    image:
-      "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=900&q=85",
-    alt: "Mũ lưỡi trai màu trung tính",
-    material: "Cotton twill",
-    fit: "Dây điều chỉnh, freesize",
-    care: "Lau sạch bằng khăn ẩm, không giặt máy.",
-    description: "Phụ kiện nhỏ gọn giúp hoàn thiện bộ trang phục mỗi ngày.",
-  },
-  {
-    id: "tat-cotton-everyday",
-    name: "Tất cotton everyday",
-    price: 99000,
-    category: "phu-kien",
-    categoryLabel: "PHỤ KIỆN · TẤT",
-    image:
-      "https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?auto=format&fit=crop&w=900&q=85",
-    alt: "Tất cotton cổ vừa màu trắng",
-    material: "Cotton pha elastane",
-    fit: "Cổ vừa, freesize 36–42",
-    care: "Giặt với nước mát, phơi nơi thoáng khí.",
-    description: "Tất mềm thoáng khí, phù hợp với nhiều kiểu giày khác nhau.",
-  },
-  {
-    id: "sneaker-everyday",
-    name: "Sneaker everyday",
-    price: 899000,
-    category: "giay",
-    categoryLabel: "GIÀY · SNEAKER",
-    image:
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=85",
-    alt: "Giày sneaker phong cách năng động",
-    material: "Vải dệt, đế cao su",
-    fit: "Size 36–42",
-    care: "Lau nhẹ bằng khăn ẩm và để khô tự nhiên.",
-    description: "Đôi sneaker êm nhẹ cho nhịp sống năng động hằng ngày.",
-  },
-  {
-    id: "sandals-minimal",
-    name: "Sandals minimal",
-    price: 499000,
-    category: "giay",
-    categoryLabel: "GIÀY · SANDALS",
-    image:
-      "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=900&q=85",
-    alt: "Sandals thiết kế tối giản",
-    material: "Da tổng hợp, đế cao su",
-    fit: "Size 36–41",
-    care: "Lau sạch sau khi sử dụng, tránh ngâm nước lâu.",
-    description: "Sandals tối giản, nhẹ nhàng cho những chuyến đi ngày nắng.",
-  },
-  {
-    id: "that-lung-basic",
-    name: "Thắt lưng basic",
-    price: 319000,
-    category: "phu-kien",
-    categoryLabel: "PHỤ KIỆN · THẮT LƯNG",
-    image:
-      "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=900&q=85",
-    alt: "Thắt lưng màu nâu phong cách tối giản",
-    material: "Da tổng hợp",
-    fit: "Dài 105 cm, có thể điều chỉnh",
-    care: "Lau bằng khăn mềm, bảo quản nơi khô thoáng.",
-    description: "Chi tiết tinh tế giúp trang phục thường ngày thêm chỉn chu.",
-  },
-];
 
 const formatPrice = price => `${currency.format(price)}₫`;
 
@@ -434,53 +194,37 @@ const restoreCart = () => {
     let product = productCatalog.find(
       catalogProduct => catalogProduct.id === savedItem.productId
     );
-    if (
-      !product &&
-      typeof savedItem.productId === "string" &&
-      typeof savedItem.name === "string" &&
-      Number.isFinite(savedItem.price) &&
-      savedItem.price >= 0 &&
-      typeof savedItem.image === "string"
-    ) {
-      product = {
-        id: savedItem.productId,
-        name: savedItem.name,
-        price: savedItem.price,
-        image: savedItem.image,
-        alt: savedItem.name,
-        categoryLabel: "SẢN PHẨM KCJ",
-        material: "Thông tin sản phẩm",
-        fit: "Theo mô tả sản phẩm",
-        care: "Thực hiện theo hướng dẫn trên nhãn sản phẩm.",
-        description: "Sản phẩm từ bộ sưu tập Streetwear KCJ.",
-      };
-    }
-    const validSize = ["S", "M", "L", "XL"].includes(savedItem.size);
+    const variant = product?.variants.find(item =>
+      item.id === savedItem.variantId ||
+      (!savedItem.variantId && item.size === savedItem.size && item.color === (savedItem.color || null))
+    );
     const validQuantity =
       Number.isSafeInteger(savedItem.quantity) &&
       savedItem.quantity > 0 &&
       savedItem.quantity <= 999;
 
-    if (!product || !validSize || !validQuantity) {
+    if (!product || !variant || !validQuantity || variant.stock <= 0) {
       console.warn("Bỏ qua một sản phẩm không hợp lệ trong giỏ hàng đã lưu.");
       return;
     }
 
-    const itemId = `${product.id}:${savedItem.size}`;
+    const itemId = variant.id;
     const existing = cart.get(itemId);
     if (existing) {
-      existing.quantity = Math.min(999, existing.quantity + savedItem.quantity);
+      existing.quantity = Math.min(variant.stock, existing.quantity + savedItem.quantity);
       return;
     }
 
     cart.set(itemId, {
       id: itemId,
+      variantId: variant.id,
       productId: product.id,
       name: product.name,
       price: product.price,
       image: product.image,
-      size: savedItem.size,
-      quantity: savedItem.quantity,
+      size: variant.size,
+      color: variant.color,
+      quantity: Math.min(savedItem.quantity, variant.stock),
     });
 
   });
@@ -493,7 +237,9 @@ const persistCart = () => {
 
   const savedCart = Array.from(cart.values()).map(item => ({
     productId: item.productId,
+    variantId: item.variantId,
     size: item.size,
+    color: item.color,
     quantity: item.quantity,
     name: item.name,
     price: item.price,
@@ -541,6 +287,13 @@ const createProductCard = product => {
   image.loading = "lazy";
   imageWrap.append(image);
 
+  if (product.stock <= 0) {
+    const badge = document.createElement("span");
+    badge.className = "product-badge";
+    badge.textContent = "Hết hàng";
+    imageWrap.append(badge);
+  }
+
   if (product.badge) {
     const badge = document.createElement("span");
     badge.className = "product-badge";
@@ -585,13 +338,13 @@ const createProductCard = product => {
   colors.innerHTML =
     '<span class="color-dot color-white"></span><span class="color-dot color-brown"></span><span class="color-caption">Nhiều màu</span>';
 
-  const actions = createProductActions(product.name);
+  const actions = createProductActions(product.name, product.stock <= 0);
   footer.append(colors, actions);
   card.append(imageWrap, info, footer);
   return card;
 };
 
-const createProductActions = productName => {
+const createProductActions = (productName, outOfStock = false) => {
   const actions = document.createElement("div");
   actions.className = "product-actions";
 
@@ -604,38 +357,169 @@ const createProductActions = productName => {
   const buyButton = document.createElement("button");
   buyButton.className = "buy-button";
   buyButton.type = "button";
-  buyButton.textContent = "Mua ngay";
+  buyButton.textContent = outOfStock ? "Hết hàng" : "Mua ngay";
+  buyButton.disabled = outOfStock;
 
   actions.append(detailButton, buyButton);
   return actions;
 };
 
 const setupProductCards = () => {
-  const existingCards = Array.from(productGrid.querySelectorAll(".product-card"));
-  existingCards.forEach(card => {
-    const product = productCatalog.find(item => item.id === card.dataset.id);
-    if (!product) {
-      return;
-    }
-    card.dataset.category = product.category;
-    card.querySelector(".product-price").textContent = formatPrice(product.price);
-    const productImage = card.querySelector(".product-image");
-    productImage.src = product.image;
-    productImage.alt = product.alt;
-
-    const footer = card.querySelector(".product-footer");
-    const oldBuyButton = footer.querySelector(".buy-button");
-    oldBuyButton.remove();
-    footer.append(createProductActions(product.name));
-  });
-
-  const existingIds = new Set(existingCards.map(card => card.dataset.id));
-  productCatalog
-    .filter(product => !existingIds.has(product.id))
-    .forEach(product => productGrid.append(createProductCard(product)));
+  productGrid.replaceChildren(...productCatalog.map(createProductCard));
 
   productCards = Array.from(productGrid.querySelectorAll(".product-card"));
-  productTotal.textContent = `${productCards.length} sản phẩm`;
+  updateCategoryFilters();
+  applyFilters();
+};
+
+const updateCategoryFilters = () => {
+  const categories = new Map();
+  productCatalog.forEach(product => {
+    if (product.category && product.categoryLabel) {
+      categories.set(product.category, product.categoryLabel);
+    }
+  });
+  if (!categories.has(activeCategory)) activeCategory = "all";
+  const buttons = [
+    ["all", "Tất cả"],
+    ...Array.from(categories.entries()),
+  ].map(([slug, label]) => {
+    const button = document.createElement("button");
+    button.className = "category-filter";
+    button.type = "button";
+    button.dataset.category = slug;
+    button.setAttribute("aria-pressed", String(slug === activeCategory));
+    button.textContent = label;
+    if (slug === activeCategory) button.classList.add("is-active");
+    return button;
+  });
+  categoryFilters.replaceChildren(...buttons);
+};
+
+const loadHomeProducts = async () => {
+  productGrid.setAttribute("aria-busy", "true");
+  productGrid.replaceChildren();
+  productTotal.textContent = "Đang tải sản phẩm...";
+  try {
+    const response = await fetch("/api/products");
+    if (!response.ok) throw new Error(`Products request failed with status ${response.status}`);
+    const data = await response.json();
+    if (!Array.isArray(data)) throw new TypeError("Products API response must be an array.");
+    productCatalog = data.map(product => ({
+      ...product,
+      image: product.images?.[0] || "",
+      alt: product.name,
+      category: product.category?.slug || "",
+      categoryLabel: product.category?.name || "KCJ",
+      variants: Array.isArray(product.variants) ? product.variants : [],
+      stock: Array.isArray(product.variants)
+        ? product.variants.reduce((total, variant) => total + variant.stock, 0)
+        : 0,
+      material: "Thông tin theo mô tả sản phẩm",
+      fit: "Tham khảo bảng size",
+      care: "Thực hiện theo hướng dẫn trên nhãn sản phẩm.",
+    }));
+    productTotal.textContent = `${productCatalog.length} sản phẩm`;
+  } catch (error) {
+    console.error("Không thể tải sản phẩm từ máy chủ:", error);
+    productCatalog = [];
+    productGrid.replaceChildren();
+    productTotal.textContent = "Không thể tải sản phẩm";
+    announce("Không thể tải danh sách sản phẩm. Vui lòng tải lại trang.");
+  } finally {
+    productGrid.setAttribute("aria-busy", "false");
+    setupProductCards();
+  }
+};
+
+const renderHomeBanners = () => {
+  const banner = homeBanners[activeBannerIndex];
+  if (!banner) return;
+
+  heroEyebrow.textContent = banner.eyebrow || "KCJ · ƯU ĐÃI MỚI";
+  heroTitle.textContent = banner.title;
+  heroDescription.textContent = banner.description || "";
+  heroDescription.hidden = !banner.description;
+  heroLink.href = banner.link || "shop.html";
+  heroLink.textContent = banner.linkText || "Khám phá ngay";
+  heroLink.target = banner.link?.startsWith("https://") ? "_blank" : "";
+  heroLink.rel = heroLink.target ? "noreferrer" : "";
+  heroNote.textContent = banner.couponCode
+    ? `Mã ưu đãi: ${banner.couponCode}`
+    : banner.eyebrow || "Thiết kế cho nhịp sống của bạn";
+  heroImage.style.backgroundImage = `url("${banner.image}")`;
+  heroImage.setAttribute("aria-label", banner.title);
+  heroImageTag.textContent = banner.eyebrow || "KCJ · SALE";
+  heroIndex.textContent = `${String(activeBannerIndex + 1).padStart(2, "0")} / ${String(homeBanners.length).padStart(2, "0")}`;
+
+  heroBannerControls.hidden = homeBanners.length < 2;
+  heroBannerControls.replaceChildren(...homeBanners.map((item, index) => {
+    const button = document.createElement("button");
+    button.className = "hero-banner-dot";
+    button.type = "button";
+    button.setAttribute("aria-label", `Hiển thị banner ${index + 1}: ${item.title}`);
+    button.setAttribute("aria-current", String(index === activeBannerIndex));
+    button.addEventListener("click", () => {
+      activeBannerIndex = index;
+      renderHomeBanners();
+    });
+    return button;
+  }));
+};
+
+const renderHomePromotions = () => {
+  const promotions = homeBanners.filter(banner => banner.couponCode);
+  homePromotions.hidden = promotions.length === 0;
+  homePromotionGrid.replaceChildren(...promotions.map(banner => {
+    const card = document.createElement("article");
+    card.className = "home-promotion-card";
+    const copy = document.createElement("div");
+    const eyebrow = document.createElement("p");
+    eyebrow.className = "eyebrow";
+    eyebrow.textContent = banner.eyebrow || "ƯU ĐÃI KCJ";
+    const title = document.createElement("h3");
+    title.textContent = banner.title;
+    const description = document.createElement("p");
+    description.textContent = banner.description || "Ưu đãi có thời hạn, áp dụng theo điều kiện của chương trình.";
+    copy.append(eyebrow, title, description);
+
+    const bottom = document.createElement("div");
+    bottom.className = "home-promotion-card-bottom";
+    const code = document.createElement("button");
+    code.className = "home-promotion-code";
+    code.type = "button";
+    code.dataset.copyCoupon = banner.couponCode;
+    code.textContent = banner.couponCode;
+    const link = document.createElement("a");
+    link.className = "home-promotion-link";
+    link.href = banner.link || "shop.html";
+    link.textContent = banner.linkText || "Mua sắm";
+    bottom.append(code, link);
+    card.append(copy, bottom);
+    return card;
+  }));
+};
+
+const loadHomeBanners = async () => {
+  try {
+    const response = await fetch("/api/banners");
+    if (!response.ok) throw new Error(`Banner request failed with status ${response.status}`);
+    const data = await response.json();
+    if (!Array.isArray(data)) throw new TypeError("Banners API response must be an array.");
+    homeBanners = data;
+    activeBannerIndex = 0;
+    if (homeBanners.length) renderHomeBanners();
+    renderHomePromotions();
+    window.clearInterval(bannerRotationTimer);
+    if (homeBanners.length > 1 && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      bannerRotationTimer = window.setInterval(() => {
+        activeBannerIndex = (activeBannerIndex + 1) % homeBanners.length;
+        renderHomeBanners();
+      }, 6500);
+    }
+  } catch (error) {
+    console.error("Không thể tải banner quảng cáo:", error);
+  }
 };
 
 const getProductForCard = card =>
@@ -677,22 +561,32 @@ const updateDetailSummary = () => {
     return;
   }
 
+  const variant = selectedProduct.variants.find(item => item.id === selectedVariantId);
   summaryProduct.textContent = selectedProduct.name;
-  summarySize.textContent = selectedSize || "Chưa chọn";
+  summarySize.textContent = variant
+    ? [variant.size, variant.color].filter(Boolean).join(" · ")
+    : "Chưa chọn";
   summaryQuantity.textContent = selectedQuantity;
   summaryTotal.textContent = formatPrice(
     selectedProduct.price * selectedQuantity
   );
 
-  const sizeIsSelected = selectedSize.length > 0;
-  detailAddButton.disabled = !sizeIsSelected;
-  detailCheckoutButton.disabled = !sizeIsSelected;
-  detailValidation.textContent = sizeIsSelected
-    ? ""
-    : "Chọn Size để thêm sản phẩm vào giỏ hàng.";
+  const variantIsAvailable = Boolean(variant && variant.stock > 0 && selectedQuantity <= variant.stock);
+  detailAddButton.disabled = !variantIsAvailable;
+  detailCheckoutButton.disabled = !variantIsAvailable;
+  detailQuantityIncrease.disabled = !variant || selectedQuantity >= variant.stock;
+  detailValidation.textContent = selectedProduct.variants.every(item => item.stock <= 0)
+    ? "Sản phẩm đã hết hàng."
+    : !variant
+      ? "Chọn một biến thể để tiếp tục."
+    : variant.stock === 0
+      ? "Hết hàng."
+      : selectedQuantity > variant.stock
+        ? `Chỉ còn ${variant.stock} sản phẩm trong kho.`
+        : `Còn ${variant.stock} sản phẩm trong kho.`;
 };
 
-const openDetail = (product, focusTarget = document.activeElement, size = "") => {
+const openDetail = (product, focusTarget = document.activeElement, variantId = "") => {
   if (!product) {
     return;
   }
@@ -702,7 +596,8 @@ const openDetail = (product, focusTarget = document.activeElement, size = "") =>
   }
 
   selectedProduct = product;
-  selectedSize = size;
+  selectedVariantId = variantId || product.variants.find(variant => variant.stock > 0)?.id || "";
+  selectedSize = product.variants.find(variant => variant.id === selectedVariantId)?.size || "";
   selectedQuantity = 1;
   returnFocusElement = focusTarget;
 
@@ -716,11 +611,22 @@ const openDetail = (product, focusTarget = document.activeElement, size = "") =>
   detailFit.textContent = product.fit;
   detailCare.textContent = product.care;
   detailQuantity.textContent = selectedQuantity;
-  sizeOptions.querySelectorAll(".size-option").forEach(button => {
-    const isSelected = button.dataset.size === selectedSize;
-    button.classList.toggle("is-selected", isSelected);
-    button.setAttribute("aria-pressed", String(isSelected));
-  });
+  sizeOptions.replaceChildren(...product.variants.map(variant => {
+    const button = document.createElement("button");
+    button.className = "size-option";
+    button.type = "button";
+    button.dataset.size = variant.size;
+    button.dataset.variantId = variant.id;
+    button.setAttribute("aria-pressed", String(variant.id === selectedVariantId));
+    button.disabled = variant.stock <= 0;
+    button.textContent = [
+      variant.size,
+      variant.color,
+      variant.stock > 0 ? `(${variant.stock})` : "(Hết hàng)",
+    ].filter(Boolean).join(" · ");
+    if (variant.id === selectedVariantId) button.classList.add("is-selected");
+    return button;
+  }));
 
   detailBackdrop.hidden = false;
   requestAnimationFrame(() => detailBackdrop.classList.add("is-visible"));
@@ -755,24 +661,35 @@ const addToCart = (product, size, quantity = 1) => {
     return false;
   }
 
-  const itemId = `${product.id}:${size}`;
+  const variant = product.variants.find(item => item.id === size || item.size === size);
+  if (!variant || variant.stock <= 0) {
+    announce("Biến thể này hiện đã hết hàng.");
+    return false;
+  }
+  const itemId = variant.id;
   const existing = cart.get(itemId);
   if (existing) {
+    if (existing.quantity + quantity > variant.stock) {
+      announce(`Chỉ còn ${variant.stock} sản phẩm trong kho.`);
+      return false;
+    }
     existing.quantity += quantity;
   } else {
     cart.set(itemId, {
       id: itemId,
+      variantId: variant.id,
       productId: product.id,
       name: product.name,
       price: product.price,
       image: product.image,
-      size,
+      size: variant.size,
+      color: variant.color,
       quantity,
     });
   }
 
   updateCart();
-  announce(`Đã thêm ${product.name} · Size ${size} vào giỏ hàng.`);
+  announce(`Đã thêm ${product.name} · ${[variant.size, variant.color].filter(Boolean).join(" · ")} vào giỏ hàng.`);
   return true;
 };
 
@@ -782,6 +699,12 @@ const changeQuantity = (itemId, difference) => {
     return;
   }
 
+  const product = productCatalog.find(candidate => candidate.id === item.productId);
+  const variant = product?.variants.find(candidate => candidate.id === item.variantId);
+  if (difference > 0 && (!variant || item.quantity >= variant.stock)) {
+    announce("Số lượng đã đạt mức tồn kho hiện có.");
+    return;
+  }
   item.quantity += difference;
   if (item.quantity <= 0) {
     cart.delete(itemId);
@@ -832,7 +755,7 @@ const openCartItemDetail = (item, focusTarget) => {
   const product = productCatalog.find(
     catalogProduct => catalogProduct.id === item.productId
   );
-  openDetail(product, focusTarget, item.size);
+  openDetail(product, focusTarget, item.variantId);
 };
 
 const updateCart = () => {
@@ -877,7 +800,7 @@ const updateCart = () => {
       name.addEventListener("click", () => openCartItemDetail(item, name));
 
       const unitPrice = document.createElement("p");
-      unitPrice.textContent = `${formatPrice(item.price)} · Size ${item.size}`;
+      unitPrice.textContent = `${formatPrice(item.price)} · ${[item.size, item.color].filter(Boolean).join(" · ")}`;
 
       const quantity = document.createElement("div");
       quantity.className = "cart-item-quantity";
@@ -895,6 +818,9 @@ const updateCart = () => {
       const increase = document.createElement("button");
       increase.type = "button";
       increase.textContent = "+";
+      const product = productCatalog.find(candidate => candidate.id === item.productId);
+      const variant = product?.variants.find(candidate => candidate.id === item.variantId);
+      increase.disabled = !variant || item.quantity >= variant.stock;
       increase.setAttribute("aria-label", `Tăng số lượng ${item.name}`);
       increase.addEventListener("click", () => changeQuantity(item.id, 1));
 
@@ -922,6 +848,94 @@ const updateCart = () => {
   persistCart();
 };
 
+const selectSavedAddress = addressId => {
+  const address = checkoutAddresses.find(item => item.id === addressId);
+  if (!address) {
+    selectedShippingAddressId = null;
+    checkoutConfirmButton.disabled = true;
+    return;
+  }
+  selectedShippingAddressId = address.id;
+  checkoutConfirmButton.disabled = false;
+  savedAddressPreview.textContent = `${address.recipient} · ${address.phone} · ${address.address}`;
+};
+
+const renderCheckoutPromotions = promotions => {
+  checkoutPromotions.replaceChildren();
+  for (const promotion of promotions) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "checkout-promotion";
+    button.disabled = !promotion.available;
+    button.textContent = `${promotion.title}: ${promotion.couponCode} · giảm ${promotion.discountPercent}%${promotion.available ? "" : " · sắp diễn ra"}`;
+    if (promotion.available) {
+      button.addEventListener("click", () => {
+        checkoutCouponCode.value = promotion.couponCode;
+        void applyCheckoutCoupon();
+      });
+    }
+    checkoutPromotions.append(button);
+  }
+};
+
+const loadCheckoutOptions = async () => {
+  const response = await fetch("/api/checkout/options", { cache: "no-store" });
+  const result = await readAuthResponse(response, "tải dữ liệu giao hàng");
+  checkoutAddresses = Array.isArray(result.addresses) ? result.addresses : [];
+  savedAddressSelect.replaceChildren();
+  if (checkoutAddresses.length) {
+    savedAddressCard.hidden = false;
+    noSavedAddressNote.hidden = true;
+    for (const address of checkoutAddresses) {
+      const option = document.createElement("option");
+      option.value = address.id;
+      option.textContent = `${address.label}${address.isDefault ? " (Mặc định)" : ""} · ${address.recipient} · ${address.phone}`;
+      savedAddressSelect.append(option);
+    }
+    const defaultAddress = checkoutAddresses.find(address => address.isDefault) || checkoutAddresses[0];
+    savedAddressSelect.value = defaultAddress.id;
+    selectSavedAddress(defaultAddress.id);
+  } else {
+    savedAddressCard.hidden = true;
+    noSavedAddressNote.hidden = false;
+    selectedShippingAddressId = null;
+    checkoutConfirmButton.disabled = true;
+  }
+  renderCheckoutPromotions(Array.isArray(result.promotions) ? result.promotions : []);
+};
+
+const applyCheckoutCoupon = async () => {
+  checkoutCouponMessage.textContent = "";
+  const code = checkoutCouponCode.value.trim();
+  if (!code) {
+    checkoutCouponMessage.textContent = "Nhập mã giảm giá trước khi áp dụng.";
+    return;
+  }
+  checkoutApplyCoupon.disabled = true;
+  try {
+    const response = await fetch("/api/checkout/coupon", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        code,
+        items: Array.from(cart.values()).map(item => ({ variantId: item.variantId, quantity: item.quantity })),
+      }),
+    });
+    appliedCoupon = await readAuthResponse(response, "kiểm tra mã giảm giá");
+    checkoutCouponCode.value = appliedCoupon.code;
+    checkoutCouponMessage.textContent = `Đã áp dụng ${appliedCoupon.code} · giảm ${formatPrice(appliedCoupon.discountAmount)}.`;
+    checkoutRemoveCoupon.hidden = false;
+    renderCheckoutOrder();
+  } catch (error) {
+    appliedCoupon = null;
+    checkoutRemoveCoupon.hidden = true;
+    checkoutCouponMessage.textContent = error instanceof Error ? error.message : "Không thể áp dụng mã.";
+    renderCheckoutOrder();
+  } finally {
+    checkoutApplyCoupon.disabled = false;
+  }
+};
+
 const openCheckout = () => {
   if (cart.size === 0) {
     announce("Giỏ hàng đang trống. Hãy chọn sản phẩm trước khi đặt hàng.");
@@ -936,6 +950,15 @@ const openCheckout = () => {
   }
 
   checkoutFormError.textContent = "";
+  checkoutCouponMessage.textContent = "";
+  appliedCoupon = null;
+  checkoutCouponCode.value = "";
+  checkoutRemoveCoupon.hidden = true;
+  selectedShippingAddressId = null;
+  checkoutAddresses = [];
+  savedAddressCard.hidden = true;
+  noSavedAddressNote.hidden = true;
+  checkoutConfirmButton.disabled = true;
   checkoutDraftOrderId = createOrderId();
   qrTransferNote.textContent = checkoutDraftOrderId;
   renderCheckoutOrder();
@@ -945,7 +968,11 @@ const openCheckout = () => {
   checkoutPanel.setAttribute("aria-hidden", "false");
   checkoutPanel.classList.add("is-open");
   setModalScrollLock();
-  document.querySelector("#customer-name").focus();
+  void loadCheckoutOptions().catch(error => {
+    noSavedAddressNote.hidden = false;
+    checkoutFormError.textContent = error instanceof Error ? error.message : "Không thể tải thông tin checkout.";
+  });
+  checkoutClose.focus();
 };
 
 const closeCheckout = (restoreFocus = true) => {
@@ -979,7 +1006,7 @@ const renderCheckoutOrder = () => {
       row.className = "checkout-order-row";
 
       const description = document.createElement("span");
-      description.textContent = `${item.name} · Size ${item.size} × ${item.quantity}`;
+      description.textContent = `${item.name} · ${[item.size, item.color].filter(Boolean).join(" · ")} × ${item.quantity}`;
 
       const lineTotal = document.createElement("strong");
       lineTotal.textContent = formatPrice(item.price * item.quantity);
@@ -988,33 +1015,23 @@ const renderCheckoutOrder = () => {
       return row;
     })
   );
-  checkoutOrderTotal.textContent = formatPrice(subtotal);
+  const discount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+  checkoutDiscountRow.hidden = discount <= 0;
+  checkoutDiscountTotal.textContent = `−${formatPrice(discount)}`;
+  checkoutOrderTotal.textContent = formatPrice(Math.max(0, subtotal - discount));
 };
 
 const validateCheckoutForm = () => {
-  const nameInput = checkoutForm.elements.namedItem("customerName");
-  const phoneInput = checkoutForm.elements.namedItem("customerPhone");
-  const addressInput = checkoutForm.elements.namedItem("customerAddress");
+  if (!selectedShippingAddressId) {
+    checkoutFormError.textContent = "Hãy lưu và chọn địa chỉ giao hàng trong tài khoản trước khi đặt hàng.";
+    return false;
+  }
   const paymentInputs = checkoutForm.querySelectorAll(
     'input[name="paymentMethod"]'
   );
-  const phone = phoneInput.value.trim();
-
-  nameInput.setCustomValidity(
-    nameInput.value.trim().length < 2
-      ? "Vui lòng nhập họ tên gồm ít nhất 2 ký tự."
-      : ""
-  );
-  phoneInput.setCustomValidity(
-    /^(?:0|\+?84)\d{9,10}$/.test(phone)
-      ? ""
-      : "Vui lòng nhập số điện thoại hợp lệ bắt đầu bằng 0 hoặc +84."
-  );
-  addressInput.setCustomValidity(
-    addressInput.value.trim().length < 8
-      ? "Vui lòng nhập địa chỉ giao hàng đầy đủ."
-      : ""
-  );
+  const installmentSelected = checkoutForm.querySelector('input[name="paymentMethod"]:checked')?.value === "installment";
+  const installmentMonths = checkoutForm.elements.namedItem("installmentMonths");
+  const installmentProvider = checkoutForm.elements.namedItem("installmentProvider");
 
   const hasPaymentMethod = Array.from(paymentInputs).some(input => input.checked);
   paymentInputs.forEach(input => {
@@ -1022,6 +1039,13 @@ const validateCheckoutForm = () => {
       hasPaymentMethod ? "" : "Vui lòng chọn phương thức thanh toán."
     );
   });
+  installmentMonths.required = installmentSelected;
+  installmentProvider.required = installmentSelected;
+  installmentProvider.setCustomValidity(
+    !installmentSelected || installmentProvider.value.trim().length >= 2
+      ? ""
+      : "Vui lòng nhập tên ngân hàng hoặc đơn vị trả góp."
+  );
 
   return checkoutForm.reportValidity();
 };
@@ -1063,8 +1087,10 @@ const renderOrderSummary = order => {
   orderPaymentElement.textContent = order.paymentMethodLabel;
   orderStatusNote.textContent =
     order.paymentMethod === "qr"
-      ? "Đặt hàng thành công. Đây là bản demo; chưa có giao dịch chuyển khoản nào được thực hiện."
-      : "Đặt hàng thành công. Đây là bản demo; chưa có yêu cầu giao hàng thật được gửi.";
+      ? "Đơn hàng đã được ghi nhận. Thông tin thanh toán QR hiện chỉ mang tính minh họa."
+      : order.paymentMethod === "installment"
+        ? "Yêu cầu trả góp đã được ghi nhận và đang chờ đối tác xác minh. Không gửi OTP hoặc CCCD cho KCJ."
+        : "Đơn hàng đã được ghi nhận và tồn kho đã cập nhật.";
   orderTotalElement.textContent = formatPrice(order.total);
 
   orderItemsElement.replaceChildren(
@@ -1168,10 +1194,11 @@ const closeAuthModal = () => {
   }
 };
 
-setupProductCards();
-restoreCart();
-applyFilters();
-updateCart();
+loadHomeProducts().then(() => {
+  restoreCart();
+  updateCart();
+});
+loadHomeBanners();
 
 productGrid.addEventListener("click", event => {
   const card = event.target.closest(".product-card");
@@ -1210,15 +1237,28 @@ categoryFilters.addEventListener("click", event => {
   applyFilters();
 });
 
+homePromotionGrid.addEventListener("click", async event => {
+  const button = event.target.closest("[data-copy-coupon]");
+  if (!button) return;
+  try {
+    await navigator.clipboard.writeText(button.dataset.copyCoupon);
+    announce(`Đã sao chép mã ${button.dataset.copyCoupon}.`);
+  } catch (error) {
+    console.error("Không thể sao chép mã giảm giá:", error);
+    announce("Không thể sao chép mã. Vui lòng ghi lại mã hiển thị.");
+  }
+});
+
 sizeOptions.addEventListener("click", event => {
-  const sizeButton = event.target.closest(".size-option");
-  if (!sizeButton) {
+  const variantButton = event.target.closest(".size-option");
+  if (!variantButton) {
     return;
   }
 
-  selectedSize = sizeButton.dataset.size;
+  selectedSize = variantButton.dataset.size;
+  selectedVariantId = variantButton.dataset.variantId;
   sizeOptions.querySelectorAll(".size-option").forEach(button => {
-    const isSelected = button === sizeButton;
+    const isSelected = button === variantButton;
     button.classList.toggle("is-selected", isSelected);
     button.setAttribute("aria-pressed", String(isSelected));
   });
@@ -1238,13 +1278,13 @@ detailQuantityIncrease.addEventListener("click", () => {
 });
 
 detailAddButton.addEventListener("click", () => {
-  if (addToCart(selectedProduct, selectedSize, selectedQuantity)) {
+  if (addToCart(selectedProduct, selectedVariantId, selectedQuantity)) {
     closeDetail();
   }
 });
 
 detailCheckoutButton.addEventListener("click", () => {
-  if (!addToCart(selectedProduct, selectedSize, selectedQuantity)) {
+  if (!addToCart(selectedProduct, selectedVariantId, selectedQuantity)) {
     return;
   }
 
@@ -1307,14 +1347,9 @@ orderClose.addEventListener("click", closeOrderSummary);
 orderContinueButton.addEventListener("click", closeOrderSummary);
 orderBackdrop.addEventListener("click", closeOrderSummary);
 accountTrigger.addEventListener("click", () => {
-  try {
-    const user = JSON.parse(localStorage.getItem("kcj-demo-user-v1") || "null");
-    if (user?.email) {
-      window.location.href = "dashboard.html";
-      return;
-    }
-  } catch (error) {
-    console.error("Không thể kiểm tra tài khoản demo hiện tại:", error);
+  if (authenticatedUser) {
+    window.location.href = "/account";
+    return;
   }
   openAuthModal("login");
 });
@@ -1350,7 +1385,7 @@ authRegisterForm.addEventListener("input", () => {
   registerMessage.textContent = "";
 });
 
-authLoginForm.addEventListener("submit", event => {
+authLoginForm.addEventListener("submit", async event => {
   event.preventDefault();
   const emailInput = authLoginForm.elements.namedItem("email");
   const passwordInput = authLoginForm.elements.namedItem("password");
@@ -1374,30 +1409,32 @@ authLoginForm.addEventListener("submit", event => {
     return;
   }
 
-  loginMessage.textContent =
-    "Đăng nhập demo thành công. Tài khoản được lưu trên thiết bị này.";
+  const submitButton = authLoginForm.querySelector('button[type="submit"]');
+  submitButton.disabled = true;
+  loginMessage.textContent = "Đang đăng nhập...";
   try {
-    const email = emailInput.value.trim().toLocaleLowerCase("vi");
-    const savedAccount = JSON.parse(
-      localStorage.getItem("kcj-demo-account-v1") || "null"
-    );
-    const name =
-      savedAccount?.email === email
-        ? savedAccount.name
-        : email.split("@")[0];
-    localStorage.setItem(
-      "kcj-demo-user-v1",
-      JSON.stringify({ name, email })
-    );
-    refreshHomeAccount({ name, email });
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: emailInput.value, password: passwordInput.value }),
+    });
+    const result = await readAuthResponse(response, "đăng nhập");
+    authenticatedUser = result.user;
+    refreshHomeAccount(result.user);
+    loginMessage.textContent = "Đăng nhập thành công.";
+    if (result.user.role === "ADMIN") {
+      window.location.assign("/account?tab=admin");
+    } else {
+      window.setTimeout(closeAuthModal, 650);
+    }
   } catch (error) {
-    console.error("Không thể lưu phiên tài khoản demo:", error);
-    loginMessage.textContent =
-      "Đăng nhập biểu mẫu thành công nhưng chưa thể lưu phiên trên thiết bị.";
+    loginMessage.textContent = error instanceof Error ? error.message : "Không thể đăng nhập.";
+  } finally {
+    submitButton.disabled = false;
   }
 });
 
-authRegisterForm.addEventListener("submit", event => {
+authRegisterForm.addEventListener("submit", async event => {
   event.preventDefault();
   const nameInput = authRegisterForm.elements.namedItem("name");
   const emailInput = authRegisterForm.elements.namedItem("email");
@@ -1432,32 +1469,38 @@ authRegisterForm.addEventListener("submit", event => {
     return;
   }
 
-  const demoAccount = {
-    name: nameInput.value.trim(),
-    email: emailInput.value.trim().toLocaleLowerCase("vi"),
-  };
+  const submitButton = authRegisterForm.querySelector('button[type="submit"]');
+  submitButton.disabled = true;
+  registerMessage.textContent = "Đang tạo tài khoản...";
   try {
-    localStorage.setItem("kcj-demo-account-v1", JSON.stringify(demoAccount));
-    localStorage.setItem("kcj-demo-user-v1", JSON.stringify(demoAccount));
-    refreshHomeAccount(demoAccount);
-    registerMessage.textContent =
-      "Tạo tài khoản demo thành công. Mật khẩu không được lưu trên thiết bị.";
+    const response = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fullName: nameInput.value,
+        email: emailInput.value,
+        password: passwordInput.value,
+      }),
+    });
+    const result = await readAuthResponse(response, "đăng ký");
+    authenticatedUser = result.user;
+    refreshHomeAccount(result.user);
+    registerMessage.textContent = "Tạo tài khoản thành công.";
+    window.setTimeout(() => window.location.assign("/account"), 650);
   } catch (error) {
-    console.error("Không thể lưu tài khoản demo:", error);
-    registerMessage.textContent =
-      "Chưa thể lưu tài khoản trên thiết bị này. Vui lòng kiểm tra quyền lưu trữ.";
+    registerMessage.textContent = error instanceof Error ? error.message : "Không thể tạo tài khoản.";
+  } finally {
+    submitButton.disabled = false;
   }
 });
 
 checkoutForm.addEventListener("change", event => {
-  if (event.target.name !== "paymentMethod") {
-    return;
-  }
-
-  const isQrPayment = event.target.value === "qr";
-  qrDemoPanel.hidden = !isQrPayment;
-  if (isQrPayment) {
-    qrTransferNote.textContent = checkoutDraftOrderId;
+  if (event.target.name === "paymentMethod") {
+    const isQrPayment = event.target.value === "qr";
+    const isInstallment = event.target.value === "installment";
+    qrDemoPanel.hidden = !isQrPayment;
+    installmentPanel.hidden = !isInstallment;
+    if (isQrPayment) qrTransferNote.textContent = checkoutDraftOrderId;
   }
 });
 
@@ -1468,7 +1511,24 @@ checkoutForm.addEventListener("input", () => {
   checkoutFormError.textContent = "";
 });
 
-checkoutForm.addEventListener("submit", event => {
+savedAddressSelect.addEventListener("change", () => selectSavedAddress(savedAddressSelect.value));
+checkoutApplyCoupon.addEventListener("click", () => void applyCheckoutCoupon());
+checkoutRemoveCoupon.addEventListener("click", () => {
+  appliedCoupon = null;
+  checkoutCouponCode.value = "";
+  checkoutCouponMessage.textContent = "Đã bỏ mã giảm giá.";
+  checkoutRemoveCoupon.hidden = true;
+  renderCheckoutOrder();
+});
+checkoutCouponCode.addEventListener("input", () => {
+  if (appliedCoupon && checkoutCouponCode.value.trim().toUpperCase() !== appliedCoupon.code.toUpperCase()) {
+    appliedCoupon = null;
+    checkoutRemoveCoupon.hidden = true;
+    renderCheckoutOrder();
+  }
+});
+
+checkoutForm.addEventListener("submit", async event => {
   event.preventDefault();
   checkoutFormError.textContent = "";
 
@@ -1485,74 +1545,60 @@ checkoutForm.addEventListener("submit", event => {
 
   const formData = new FormData(checkoutForm);
   const paymentMethod = formData.get("paymentMethod");
-  const items = Array.from(cart.values()).map(item => ({ ...item }));
-  const total = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-  const order = {
-    id: checkoutDraftOrderId || createOrderId(),
-    createdAt: new Date().toISOString(),
-    accountEmail: (() => {
-      try {
-        return JSON.parse(localStorage.getItem("kcj-demo-user-v1") || "null")
-          ?.email || "";
-      } catch (error) {
-        console.error("Không thể đọc tài khoản demo hiện tại:", error);
-        return "";
-      }
-    })(),
-    customer: {
-      name: String(formData.get("customerName")).trim(),
-      phone: String(formData.get("customerPhone")).trim(),
-      address: String(formData.get("customerAddress")).trim(),
-    },
-    paymentMethod,
-    paymentMethodLabel:
-      paymentMethod === "qr"
-        ? "Chuyển khoản QR (demo)"
-        : "Thanh toán khi nhận hàng (COD)",
-    items,
-    total,
-  };
-
-  let orderHistory;
+  const submitButton = checkoutConfirmButton;
+  submitButton.disabled = true;
+  submitButton.textContent = "Đang lưu đơn hàng...";
   try {
-    orderHistory = JSON.parse(
-      localStorage.getItem("kcj-order-history-v1") || "[]"
-    );
-    if (!Array.isArray(orderHistory)) {
-      throw new TypeError("Lịch sử đơn hàng không đúng định dạng.");
-    }
-    localStorage.setItem(
-      "kcj-order-history-v1",
-      JSON.stringify([order, ...orderHistory].slice(0, 100))
-    );
-  } catch (error) {
-    console.error("Không thể lưu lịch sử đơn hàng:", error);
-    checkoutFormError.textContent =
-      "Chưa thể lưu lịch sử đơn hàng trên thiết bị này. Vui lòng kiểm tra quyền lưu trữ rồi thử lại.";
-    return;
-  }
-
-  if (clearStoredCartForOrder()) {
+    const response = await fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        shippingAddressId: selectedShippingAddressId,
+        paymentMethod,
+        installmentMonths: paymentMethod === "installment" ? Number(formData.get("installmentMonths")) : undefined,
+        installmentProvider: paymentMethod === "installment" ? String(formData.get("installmentProvider")).trim() : undefined,
+        discountCode: appliedCoupon?.code || undefined,
+        items: Array.from(cart.values()).map(item => ({
+          variantId: item.variantId,
+          quantity: item.quantity,
+        })),
+      }),
+    });
+    const result = await readAuthResponse(response, "đặt hàng");
+    const customer = {
+      name: result.customerName,
+      phone: result.phone,
+      address: result.shippingAddress,
+    };
+    const order = {
+      id: result.id,
+      createdAt: result.createdAt,
+      customer,
+      paymentMethod,
+      paymentMethodLabel: paymentMethod === "qr"
+        ? "Chuyển khoản QR (demo)"
+        : paymentMethod === "installment"
+          ? `Trả góp ${result.installmentMonths} tháng · ${result.installmentProvider} (chờ đối tác xác nhận)`
+          : "Thanh toán khi nhận hàng (COD)",
+      items: result.items.map(item => ({
+        name: item.variant.product.name,
+        size: item.variant.size,
+        color: item.variant.color,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+      total: result.totalAmount,
+    };
+    cart.clear();
+    updateCart();
     showOrderSummary(order);
-  } else {
-    try {
-      const savedOrders = JSON.parse(
-        localStorage.getItem("kcj-order-history-v1") || "[]"
-      );
-      localStorage.setItem(
-        "kcj-order-history-v1",
-        JSON.stringify(
-          Array.isArray(savedOrders)
-            ? savedOrders.filter(savedOrder => savedOrder.id !== order.id)
-            : []
-        )
-      );
-    } catch (error) {
-      console.error("Không thể hoàn tác lịch sử đơn chưa hoàn tất:", error);
-    }
+    await loadHomeProducts();
+  } catch (error) {
+    checkoutFormError.textContent =
+      error instanceof Error ? error.message : "Không thể lưu đơn hàng. Vui lòng thử lại.";
+  } finally {
+    submitButton.disabled = !selectedShippingAddressId;
+    submitButton.textContent = "Xác nhận đặt hàng";
   }
 });
 
@@ -1566,10 +1612,19 @@ document.querySelector("#home-search-form").addEventListener("submit", event => 
   window.location.href = `shop.html${query ? `?q=${encodeURIComponent(query)}` : ""}`;
 });
 
-try {
-  refreshHomeAccount(
-    JSON.parse(localStorage.getItem("kcj-demo-user-v1") || "null")
-  );
-} catch (error) {
-  console.error("Không thể khôi phục tài khoản demo trên trang chủ:", error);
-}
+fetch("/api/auth/session")
+  .then(response => {
+    if (!response.ok) throw new Error(`Session request failed with status ${response.status}`);
+    return response.json();
+  })
+  .then(result => {
+    authenticatedUser = result.user;
+    refreshHomeAccount(result.user);
+    document.querySelector("#admin-nav-link").hidden = result.user?.role !== "ADMIN";
+  })
+  .catch(error => {
+    console.error("Không thể xác minh phiên tài khoản:", error);
+    authenticatedUser = null;
+    refreshHomeAccount(null);
+    document.querySelector("#admin-nav-link").hidden = true;
+  });

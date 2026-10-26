@@ -1,0 +1,641 @@
+.account-page {
+  --account-bg: #f7f5f1;
+  --account-card: #fff;
+  --account-text: #24221f;
+  --account-muted: #77716a;
+  --account-border: #e7e2da;
+  min-height: 100vh;
+  background: var(--account-bg);
+  color: var(--account-text);
+  font-family: Arial, sans-serif;
+}
+
+:root.dark .account-page {
+  --account-bg: #181817;
+  --account-card: #242321;
+  --account-text: #f4f0e9;
+  --account-muted: #b8afa3;
+  --account-border: #403d38;
+}
+
+.account-header {
+  display: flex;
+  min-height: 72px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 12px max(5vw, 20px);
+  border-bottom: 1px solid var(--account-border);
+  background: var(--account-card);
+}
+
+.account-header > div,
+.account-inline-actions,
+.account-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.account-brand {
+  color: var(--account-text);
+  font-family: Georgia, serif;
+  font-size: 25px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.account-brand span {
+  color: #a56c46;
+  font-size: 13px;
+  letter-spacing: .16em;
+}
+
+.account-link-button,
+.account-inline-actions button,
+.account-form-actions > button:not(.account-primary) {
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  color: #95623f;
+  cursor: pointer;
+  font: inherit;
+}
+
+.account-layout {
+  display: grid;
+  width: min(1180px, calc(100% - 40px));
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 40px;
+  margin: 46px auto;
+}
+
+.account-sidebar {
+  align-self: start;
+  padding: 10px 0;
+}
+
+.account-sidebar h1 {
+  margin: 12px 0 28px;
+  font: 400 34px/1.15 Georgia, serif;
+}
+
+.account-sidebar h1 em {
+  color: #a56c46;
+  font-weight: 400;
+}
+
+.account-eyebrow {
+  margin: 0 0 8px;
+  color: #a56c46;
+  font-size: 10px;
+  letter-spacing: .15em;
+}
+
+.account-sidebar nav {
+  display: grid;
+  gap: 5px;
+}
+
+.account-sidebar nav button {
+  padding: 12px;
+  border: 0;
+  background: transparent;
+  color: var(--account-muted);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.account-sidebar nav button.is-active {
+  background: var(--account-card);
+  color: var(--account-text);
+  box-shadow: inset 3px 0 #a56c46;
+}
+
+.account-content {
+  min-width: 0;
+}
+
+.account-card {
+  padding: clamp(20px, 4vw, 36px);
+  border: 1px solid var(--account-border);
+  background: var(--account-card);
+}
+
+.account-card h2 {
+  margin: 0 0 24px;
+  font: 400 28px Georgia, serif;
+}
+
+.account-card h3 {
+  margin: 28px 0 18px;
+  font: 400 21px Georgia, serif;
+}
+
+.account-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.account-form label {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  color: var(--account-muted);
+  font-size: 13px;
+}
+
+.account-form input:not([type="checkbox"]),
+.account-form select,
+.account-setting-row select {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 43px;
+  padding: 10px 12px;
+  border: 1px solid var(--account-border);
+  border-radius: 0;
+  background: var(--account-card);
+  color: var(--account-text);
+  font: inherit;
+}
+
+.account-form input[readonly] {
+  opacity: .68;
+}
+
+.account-wide {
+  grid-column: 1 / -1;
+}
+
+.account-primary {
+  justify-self: start;
+  min-height: 42px;
+  padding: 10px 20px;
+  border: 1px solid #282622;
+  background: #282622;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+}
+
+.account-primary:disabled {
+  cursor: wait;
+  opacity: .6;
+}
+
+.account-avatar-field {
+  display: grid;
+  grid-column: 1 / -1;
+  justify-items: start;
+  gap: 8px;
+  color: var(--account-muted);
+  font-size: 12px;
+}
+
+.account-avatar {
+  display: grid;
+  width: 92px;
+  height: 92px;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #eee8df;
+  color: #8a5d3b;
+  font: 36px Georgia, serif;
+}
+
+.account-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.account-upload {
+  display: inline-flex !important;
+  width: fit-content;
+  padding: 9px 12px;
+  border: 1px solid var(--account-border);
+  cursor: pointer;
+}
+
+.account-upload input {
+  display: none;
+}
+
+.account-alert {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  background: var(--account-card);
+  border: 1px solid var(--account-border);
+  font-size: 13px;
+}
+
+.account-success {
+  border-left: 3px solid #41815a;
+}
+
+.account-error {
+  border-left: 3px solid #a32929;
+}
+
+.account-login {
+  width: min(520px, calc(100% - 40px));
+  margin: 15vh auto;
+}
+
+.account-login p,
+.account-order p,
+.account-address p,
+.account-setting-row p {
+  color: var(--account-muted);
+  font-size: 13px;
+}
+
+.account-address-list,
+.account-orders {
+  display: grid;
+  gap: 12px;
+}
+
+.account-address,
+.account-order {
+  padding: 16px;
+  border: 1px solid var(--account-border);
+}
+
+.account-address {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.account-address p {
+  margin: 7px 0 0;
+}
+
+.account-default {
+  margin-left: 10px;
+  color: #a56c46;
+  font-size: 11px;
+}
+
+.account-check {
+  display: flex !important;
+  grid-column: 1 / -1;
+  align-items: center;
+  flex-direction: row;
+}
+
+.account-check input,
+.account-setting-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: #986342;
+}
+
+.account-form-actions {
+  grid-column: 1 / -1;
+}
+
+.account-order-heading,
+.account-order li,
+.account-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.account-order-status {
+  padding: 5px 8px;
+  background: #f2eee8;
+  color: #745237;
+  font-size: 11px;
+}
+
+.account-order-status.status-cancelled {
+  background: #f8e7e5;
+  color: #9b3028;
+}
+
+.account-order-sync {
+  margin: -10px 0 18px;
+  color: var(--account-muted);
+  font-size: 12px;
+}
+
+.account-order-lookup {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 14px;
+  border: 1px solid var(--account-border);
+}
+
+.account-order-lookup > label {
+  color: var(--account-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.account-order-lookup > div {
+  display: flex;
+  gap: 8px;
+}
+
+.account-order-lookup input {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 40px;
+  flex: 1;
+  padding: 9px 11px;
+  border: 1px solid var(--account-border);
+  background: var(--account-card);
+  color: var(--account-text);
+  font: inherit;
+}
+
+.account-order-lookup button {
+  padding: 8px 12px;
+  border: 1px solid var(--account-border);
+  background: var(--account-card);
+  color: var(--account-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+}
+
+.account-order-lookup button:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+.account-order-lookup p {
+  margin: 0;
+  color: var(--account-muted);
+  font-size: 12px;
+}
+
+.account-order-tracking {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 18px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.account-order-tracking li {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  color: var(--account-muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.account-order-tracking li span {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid var(--account-border);
+  border-radius: 50%;
+  background: var(--account-card);
+  color: var(--account-muted);
+  font-size: 12px;
+}
+
+.account-order-tracking li.is-complete,
+.account-order-tracking li.is-current {
+  color: var(--account-text);
+}
+
+.account-order-tracking li.is-complete span,
+.account-order-tracking li.is-current span {
+  border-color: #986342;
+  background: #986342;
+  color: #fff;
+}
+
+.account-order-cancelled {
+  padding: 10px 12px;
+  border-left: 3px solid #a32929;
+  background: #f8e7e5;
+}
+
+.account-order ul {
+  display: grid;
+  gap: 9px;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+
+.account-order li span {
+  white-space: nowrap;
+}
+
+.account-order-total {
+  display: block;
+  text-align: right;
+}
+
+.account-receipt-link {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 9px 12px;
+  border: 1px solid var(--account-border);
+  color: var(--account-text);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.account-receipt-link:hover {
+  border-color: #986342;
+  color: #986342;
+}
+
+.account-setting-row {
+  min-height: 72px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--account-border);
+}
+
+.account-setting-row p {
+  margin: 6px 0 0;
+}
+
+.account-setting-row select {
+  width: auto;
+  min-width: 140px;
+}
+
+.account-setting-toggle {
+  cursor: pointer;
+}
+
+.account-setting-toggle small {
+  display: block;
+  margin-top: 6px;
+  color: var(--account-muted);
+}
+
+.account-hint {
+  margin-top: 20px;
+  color: var(--account-muted);
+  font-size: 13px;
+}
+
+.account-hint a {
+  color: #a56c46;
+}
+
+.account-admin-card {
+  padding: 0;
+}
+
+.account-admin {
+  color: var(--account-text);
+}
+
+.account-admin-heading {
+  padding: 26px clamp(20px, 4vw, 36px) 20px;
+}
+
+.account-admin-heading h2 {
+  margin: 4px 0 8px;
+  font: 400 28px Georgia, serif;
+}
+
+.account-admin-heading > p:last-child {
+  margin: 0;
+  color: var(--account-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.account-admin-tabs {
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  padding: 0 clamp(14px, 3vw, 28px);
+  border-bottom: 1px solid var(--account-border);
+}
+
+.account-admin-tabs button {
+  flex: 0 0 auto;
+  padding: 12px 10px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--account-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+}
+
+.account-admin-tabs button.is-active {
+  border-bottom-color: #a56c46;
+  color: var(--account-text);
+}
+
+.account-admin-body {
+  padding: clamp(16px, 3vw, 28px);
+}
+
+.account-admin-body .admin-page-heading {
+  margin-bottom: 18px;
+}
+
+.account-admin-body .admin-page-heading h1 {
+  color: var(--account-text);
+}
+
+.account-admin-body .admin-muted {
+  color: var(--account-muted);
+}
+
+.account-admin-body .admin-card,
+.account-admin-body .admin-overview-card {
+  border-color: var(--account-border);
+  background: var(--account-card);
+  color: var(--account-text);
+}
+
+.account-admin-body .admin-table th,
+.account-admin-body .admin-table td {
+  border-color: var(--account-border);
+}
+
+.account-admin-body .admin-overview-card {
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+:root.dark .account-admin-body .admin-card,
+:root.dark .account-admin-body .admin-overview-card {
+  background: #242321;
+  color: var(--account-text);
+}
+
+@media (max-width: 760px) {
+  .account-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin: 24px auto;
+  }
+
+  .account-sidebar h1 {
+    margin-bottom: 16px;
+  }
+
+  .account-sidebar nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .account-sidebar nav button {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .account-admin-body {
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .account-form {
+    grid-template-columns: 1fr;
+  }
+
+  .account-wide,
+  .account-avatar-field,
+  .account-check,
+  .account-form-actions {
+    grid-column: auto;
+  }
+
+  .account-address {
+    flex-direction: column;
+  }
+
+  .account-order-tracking {
+    gap: 4px;
+  }
+
+  .account-order-tracking li {
+    font-size: 9px;
+  }
+
+  .account-order-lookup > div {
+    flex-wrap: wrap;
+  }
+
+  .account-order-lookup input {
+    flex-basis: 100%;
+  }
+}

@@ -8,7 +8,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="vi">
+    <html lang="vi" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{document.documentElement.classList.toggle("dark",localStorage.getItem("kcj-theme")==="dark")}catch(error){console.error("Không thể tải giao diện đã lưu:",error)}`,
+          }}
+        />
+      </head>
       <body>{children}</body>
     </html>
   );
